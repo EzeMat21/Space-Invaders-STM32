@@ -1,0 +1,9 @@
+../Core/Src/invaders.c:20:11:getPlayer	4	static
+../Core/Src/invaders.c:25:10:getAlien	16	static
+../Core/Src/invaders.c:29:12:getDisparo	4	static
+../Core/Src/invaders.c:33:6:playerInit	4	static
+../Core/Src/invaders.c:39:6:plotPlayer	24	static
+../Core/Src/invaders.c:66:6:InvaderInit	24	static
+../Core/Src/invaders.c:78:6:plotAliens	48	static
+../Core/Src/invaders.c:177:6:disparoInit	4	static
+../Core/Src/invaders.c:185:6:disparar	40	static

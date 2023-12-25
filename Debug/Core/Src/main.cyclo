@@ -1,0 +1,9 @@
+../Core/Src/main.c:110:5:main	1
+../Core/Src/main.c:197:6:SystemClock_Config	4
+../Core/Src/main.c:244:13:MX_ADC1_Init	3
+../Core/Src/main.c:291:13:MX_I2C1_Init	2
+../Core/Src/main.c:325:13:MX_GPIO_Init	1
+../Core/Src/main.c:381:6:entryJoystick	3
+../Core/Src/main.c:423:6:entryPantalla	10
+../Core/Src/main.c:523:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:540:6:Error_Handler	1

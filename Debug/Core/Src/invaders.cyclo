@@ -1,0 +1,9 @@
+../Core/Src/invaders.c:20:11:getPlayer	1
+../Core/Src/invaders.c:25:10:getAlien	1
+../Core/Src/invaders.c:29:12:getDisparo	1
+../Core/Src/invaders.c:33:6:playerInit	1
+../Core/Src/invaders.c:39:6:plotPlayer	5
+../Core/Src/invaders.c:66:6:InvaderInit	3
+../Core/Src/invaders.c:78:6:plotAliens	20
+../Core/Src/invaders.c:177:6:disparoInit	1
+../Core/Src/invaders.c:185:6:disparar	5
