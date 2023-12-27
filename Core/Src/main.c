@@ -40,6 +40,7 @@ typedef struct{
 }botones_t;
 
 
+//matriz_aliens_t matriz_aliens;
 dificultad_t dificultad;
 
 
@@ -438,64 +439,33 @@ void entryPantalla(void *argument)
 	InvaderInit();
 	disparoInit();
 
-
-	uint8_t vel = 0;
-	uint8_t conteo = 0;
-
-	orientacion_t orientacion = mov_derecha;		//Se comienza el movimiento hacia la derecha.
 	dificultad.velocidad_horizontal = 1;
 	dificultad.velocidad_bajada = 1;
 
-
 	//Para el disparo.
-	uint8_t numero_disparos = 0;
+	uint8_t boton_apretado = 0;
 
   for(;;)
   {
-	osStatus_t res = osMessageQueueGet(queueJoystPantHandle, &joystick, 0 , osWaitForever);
+	osStatus_t res = osMessageQueueGet(queueJoystPantHandle, &joystick, 0 , osWaitForever);	//Se espera a recibir los valores de los botones del joystick
 
-	if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+	if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);	//Si no se recibio correctamente, prender led.
 
 	else{
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);	//Si se recibio correctamente de la cola.
 
+
+		//Se grafican el player, aliens y disparo.
 		plotPlayer(joystick.x_value, getPlayer());
-		plotAliens(&orientacion, vel, &conteo);
-		vel++;
+		plotAliens(getMovAliens());
 
-		disparar(&numero_disparos);
+		disparar(&boton_apretado);
 
-
-		//Si se dispara a una alien
-
-		for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
-			for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
-
-				if( (getDisparo()->posicion_x >= getAlien(y,x)->posicion_X) &&  (getDisparo()->posicion_x <= getAlien(y,x)->posicion_X + 15)){
-					if( (getDisparo()->posicion_y >= getAlien(y,x)->posicion_Y) && (getDisparo()->posicion_y <= getAlien(y,x)->posicion_Y + 7) ){
-						getAlien(y,x)->vivo = false;
-						getDisparo()->posicion_y = false;
-					}
-
-				}
-			}
-		}
-
-		SSD1306_DrawPixel(0,0,1);
-
-
-		//Prender led si se apreta el boton
+		//Prender led si se apretó el boton
 		if(joystick.boton == true){
 
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
-			//disparoOK = 1;
-			numero_disparos++;
-
-			if(numero_disparos > 1){
-				numero_disparos = 1;
-			}
-
-
+			boton_apretado = 1;
 		}
 		else{
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
