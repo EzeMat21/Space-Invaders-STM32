@@ -33,16 +33,14 @@
 
 typedef struct{
 
-	uint16_t x_value;
-	uint16_t y_value;
+	uint8_t x_value;
+	uint8_t y_value;
 	uint8_t boton;
 
 }botones_t;
 
-
-//matriz_aliens_t matriz_aliens;
 dificultad_t dificultad;
-
+uint8_t opciones_principal = principal_nulo;
 
 
 /* USER CODE END PTD */
@@ -50,6 +48,8 @@ dificultad_t dificultad;
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+void config_ADC_canal0();
+void config_ADC_canal1();
 
 /* USER CODE END PD */
 
@@ -259,7 +259,7 @@ static void MX_ADC1_Init(void)
   */
   hadc1.Instance = ADC1;
   hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
@@ -367,6 +367,32 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void config_ADC_canal0(){
+
+	ADC_ChannelConfTypeDef sConfig = {0};
+
+	  sConfig.Channel = ADC_CHANNEL_0;
+	  sConfig.Rank = ADC_REGULAR_RANK_1;
+	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+}
+
+void config_ADC_canal1(){
+
+	ADC_ChannelConfTypeDef sConfig = {0};
+
+	  sConfig.Channel = ADC_CHANNEL_1;
+	  sConfig.Rank = ADC_REGULAR_RANK_1;
+	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+}
+
 
 
 
@@ -385,24 +411,68 @@ void entryJoystick(void *argument)
   /* Infinite loop */
 
 	botones_t joystick;
+	//uint32_t ADC_values[2];
 
-	//uint16_t val;
+	uint16_t val_x, val_y;
+
+	//HAL_ADC_Start_DMA(&hadc1, ADC_values, sizeof(ADC_values));
 
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
 
   for(;;)
   {
+
+	  //Joystick eje X: derecha o izquierda.
+	  //ADC1->CHSELR  = 0x01;
+	  config_ADC_canal0();
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 10);
-	  joystick.x_value = HAL_ADC_GetValue(&hadc1);
+	  val_x = HAL_ADC_GetValue(&hadc1);
+	  HAL_ADC_Stop(&hadc1);
 
-	  if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_RESET){
-		  joystick.boton = true;
+	  /*
+	  //Joystick eje Y: arriba o abajo.
+	  //ADC1->CHSELR  = 0x02;
+	  config_ADC_canal1();
+	  HAL_ADC_Start(&hadc1);
+	  HAL_ADC_PollForConversion(&hadc1, 10);
+	  val_y = HAL_ADC_GetValue(&hadc1);
+	  HAL_ADC_Stop(&hadc1);*/
+
+	  //val_x = ADC_values[0];
+	  //val_y = ADC_values[1];
+
+	  if(val_x > 2000){
+		  joystick.x_value = derecha;
+	  }
+	  else if(val_x < 1600){
+		  joystick.x_value = izquierda;
 	  }
 	  else{
-		  joystick.boton = false;
+		  joystick.x_value = nuloo;
 	  }
+
+	  /*if(val_y > 2000){
+		  joystick.y_value = arriba;
+	  }
+	  else if(val_y < 1800){
+		  joystick.y_value = abajo;
+	  }
+	  else{
+		  joystick.y_value = nulo;
+	  }*/
+
+
+	  //Boton del Joystick.
+
+	  if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_RESET){
+		  joystick.boton = enter;
+	  }
+	  else{
+		  joystick.boton = nulo;
+	  }
+
 
 	osStatus_t res = osMessageQueuePut(queueJoystPantHandle, &joystick, 0, 0);
 	if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
@@ -442,8 +512,7 @@ void entryPantalla(void *argument)
 	dificultad.velocidad_horizontal = 1;
 	dificultad.velocidad_bajada = 1;
 
-	//Para el disparo.
-	uint8_t boton_apretado = 0;
+	menuInit();
 
   for(;;)
   {
@@ -455,21 +524,34 @@ void entryPantalla(void *argument)
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);	//Si se recibio correctamente de la cola.
 
 
-		//Se grafican el player, aliens y disparo.
-		plotPlayer(joystick.x_value, getPlayer());
-		plotAliens(getMovAliens());
+		menuActualizar(joystick.x_value, joystick.y_value, joystick.boton);
 
-		disparar(&boton_apretado);
+		//SSD1306_DrawFilledTriangle(40,40, 43, y2, x3, y3, color)
 
-		//Prender led si se apretó el boton
-		if(joystick.boton == true){
 
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
-			boton_apretado = 1;
-		}
-		else{
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
-		}
+
+			/*
+
+			//Se grafican el player, aliens y disparo.
+			plotPlayer(joystick.x_value, getPlayer());
+			plotAliens();
+
+			disparar();
+
+
+
+			//Prender led si se apretó el boton
+			if(joystick.boton == true){
+
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
+				//boton_apretado = 1;
+				getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
+			}
+			else{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
+			}
+
+			*/
 
 
 	}

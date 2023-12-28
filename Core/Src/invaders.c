@@ -8,16 +8,14 @@
 
 #include "invaders.h"
 
-
+//Variables del jugador Player
 player_t Player;
-
-alien_t Alien[NUM_ALIEN_FILA][NUM_ALIEN_COLUMNA];
-
 disparo_t Disparo;
 
+//Variables de los aliens
 movimiento_aliens_t movimiento_Aliens;
+alien_t Alien[NUM_ALIEN_FILA][NUM_ALIEN_COLUMNA];
 
-//extern matriz_aliens_t matriz_aliens;
 
 extern dificultad_t dificultad;
 
@@ -46,9 +44,9 @@ void playerInit(){
 
 }
 
-void plotPlayer(uint16_t direccion, player_t *player){
+void plotPlayer(uint8_t direccion, player_t *player){
 
-	if( direccion > 2000){
+	if(direccion == derecha){
 
 		if(player->posicion_X >= 120){
 			player->posicion_X = 120;
@@ -58,7 +56,7 @@ void plotPlayer(uint16_t direccion, player_t *player){
 		}
 
 	}
-	else if(direccion < 1800){
+	else if(direccion == izquierda){
 
 		if(player->posicion_X <= 0){
 			player->posicion_X = 0;
@@ -79,8 +77,8 @@ void InvaderInit(){
 
 	for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 		for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
-			getAlien(y,x)->posicion_X  =  OFFSET_INICIO + x*(TAMANO_ALIEN_CHICO + ESPACIO_ENTRE_COLUMNAS);
-			getAlien(y,x)->posicion_Y = y*(TAMANO_ALIEN_CHICO + ESPACIO_ENTRE_FILAS);
+			getAlien(y,x)->posicion_X  =  OFFSET_INICIO + x*(TAMANO_ALIEN+ ESPACIO_ENTRE_COLUMNAS);
+			getAlien(y,x)->posicion_Y = y*(TAMANO_ALIEN+ ESPACIO_ENTRE_FILAS);
 			getAlien(y, x)->vivo = true;
 			getAlien(y, x)->conteo_explosion = 2;
 		}
@@ -124,11 +122,11 @@ void plotAliens(){
 
 	//Aqui se cambia la orientacion de los aliens: cuando se llega al borde de la pantalla los aliens pasan a moverse hacia la derecha o hacia la izquierda.
 
-			if( getAlien(0,7)->posicion_X >= 39){
+			if( (getAlien(0,6)->posicion_X + TAMANO_ALIEN + 4) >= 127){
 
 				getMovAliens()->orientacion = mov_izquierda;
 			}
-			if( getAlien(0,0)->posicion_X <= 0){
+			if( (getAlien(0,0)->posicion_X) <= 0){
 				getMovAliens()->orientacion = mov_derecha;
 				getMovAliens()->conteo_bajada = getMovAliens()->conteo_bajada + 1;
 			}
@@ -184,56 +182,60 @@ void plotAliens(){
 
 void disparoInit(){
 
-	Disparo.posicion_x = 255;
-	Disparo.posicion_y = 58;
+	Disparo.posicion_x = 0;
+	Disparo.posicion_y = POSICION_INICIAL_DISPARO;
 	Disparo.disparo = false;
 }
 
 
-void disparar(uint8_t *boton_apretado){
+void disparar(){
 
 
-			if(*boton_apretado == 1){
+			if(getDisparo()->numero_disparos == 1){
 				getDisparo()->disparo = true;
 				getDisparo()->posicion_x = getPlayer()->posicion_X;
-				*boton_apretado = 0;
-				//getDisparo()->numero_disparos = 1;
 			}
 
 
 			if(getDisparo()->disparo == true){
-				SSD1306_DrawLine(getDisparo()->posicion_x + 4, getDisparo()->posicion_y, getDisparo()->posicion_x+4, getDisparo()->posicion_y + 3, 1);
-				getDisparo()->posicion_y = getDisparo()->posicion_y - 8;
+				SSD1306_DrawLine(getDisparo()->posicion_x + 4, getDisparo()->posicion_y, getDisparo()->posicion_x + 4, getDisparo()->posicion_y + 3, 1);
+				getDisparo()->posicion_y = getDisparo()->posicion_y - VELOCIDAD_DISPARO_PLAYER;
 
 
 				if(getDisparo()->posicion_y <= 0){
+					//Se reinician los valores del disparo
 					getDisparo()->disparo = false;
-					getDisparo()->posicion_y = 58;
-					//getDisparo()->numero_disparos = 0;
+					getDisparo()->posicion_y = POSICION_INICIAL_DISPARO;
+					getDisparo()->numero_disparos = 0;
 				}
 			}
 
 
-			//Desaparecer al alien si llega a ser disparado.
+			//Eliminar los aliens si se produce un disparo. Se fija si el disparo se encuentra en el area comprendido por cada alien.
 			for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 				for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
 
-					if( (getDisparo()->posicion_x >= getAlien(y,x)->posicion_X) &&  (getDisparo()->posicion_x <= getAlien(y,x)->posicion_X + (TAMANO_ALIEN_CHICO + ESPACIO_ENTRE_COLUMNAS) )){
-						if( (getDisparo()->posicion_y >= getAlien(y,x)->posicion_Y) && (getDisparo()->posicion_y <= getAlien(y,x)->posicion_Y + (TAMANO_ALIEN_CHICO + ESPACIO_ENTRE_FILAS)) ){
+					if( (getDisparo()->posicion_x >= getAlien(y,x)->posicion_X) &&  (getDisparo()->posicion_x <= getAlien(y,x)->posicion_X + (TAMANO_ALIEN+ ESPACIO_ENTRE_COLUMNAS) )){
+						if( (getDisparo()->posicion_y >= getAlien(y,x)->posicion_Y) && (getDisparo()->posicion_y <= getAlien(y,x)->posicion_Y + (TAMANO_ALIEN+ ESPACIO_ENTRE_FILAS)) ){
 
 								if(getAlien(y,x)->vivo == true){
 									getAlien(y,x)->vivo = false;
-									getDisparo()->disparo = false;
-									getDisparo()->posicion_y = 58;
-									getDisparo()->numero_disparos = 0;
 									getAlien(y,x)->explosion = true;
+
+									//Se reinician los valores del disparo
+									getDisparo()->disparo = false;
+									getDisparo()->posicion_y = POSICION_INICIAL_DISPARO;
+									getDisparo()->numero_disparos = 0;
+
 
 								}
 						}
 
 					}
 
-
+					//Se grafican las explosiones, como la pantalla se refresca muy rapido, las se utiliza una variable 'conteo_explosiones' para
+					//que se grafique la explosion por mas tiempo y cuando conteo_explosiones = 0 ahi se deja de graficar las explosiones.
+					//Tambien se definio una variable explosion, si es true se entra a este if y se decrementa conteo_explosiones.
 					if(getAlien(y,x)->explosion == true){
 						SSD1306_DrawBitmap(getAlien(y,x)->posicion_X, getAlien(y,x)->posicion_Y,explosion,16,8,1);
 						getAlien(y,x)->conteo_explosion = getAlien(y,x)->conteo_explosion - 1;

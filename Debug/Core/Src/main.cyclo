@@ -3,7 +3,9 @@
 ../Core/Src/main.c:245:13:MX_ADC1_Init	3
 ../Core/Src/main.c:292:13:MX_I2C1_Init	2
 ../Core/Src/main.c:326:13:MX_GPIO_Init	1
-../Core/Src/main.c:382:6:entryJoystick	3
-../Core/Src/main.c:424:6:entryPantalla	3
-../Core/Src/main.c:493:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:510:6:Error_Handler	1
+../Core/Src/main.c:370:6:config_ADC_canal0	2
+../Core/Src/main.c:383:6:config_ADC_canal1	2
+../Core/Src/main.c:408:6:entryJoystick	5
+../Core/Src/main.c:494:6:entryPantalla	2
+../Core/Src/main.c:575:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:592:6:Error_Handler	1

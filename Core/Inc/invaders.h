@@ -11,6 +11,7 @@
 
 
 #include "ssd1306.h"
+#include "menu.h"
 
 //---------------------------------------------------------------Player-------------------------------------------------------
 
@@ -25,11 +26,10 @@ typedef struct{
 
 }player_t;
 
-//enum Input{Izq, Der, Disparo, Exit};
-
+/*
 static const unsigned char pato[]={
 		14, 11, 14, 60, 252, 124, 28, 8
-};
+};*/
 
 static const unsigned char nave[8] = {
   0b00011000,
@@ -63,7 +63,8 @@ static const unsigned char explosion[] ={
 
 
 #define OFFSET_INICIO 10
-#define TAMANO_ALIEN_CHICO 8
+//#define TAMANO_ALIEN_CHICO 8
+#define TAMANO_ALIEN 8
 #define ESPACIO_ENTRE_COLUMNAS 5
 #define ESPACIO_ENTRE_FILAS 3
 
@@ -96,7 +97,6 @@ typedef enum{
 
 typedef struct{
 
-	//alien_t alien[NUM_ALIEN_FILA][NUM_ALIEN_COLUMNA];
 	orientacion_t orientacion;
 	uint8_t conteo_horizontal;
 	uint8_t conteo_bajada;
@@ -143,13 +143,15 @@ static const unsigned char InvaderTopGfx[]= {	//SSD1306_DrawBitmap(0,0,InvaderMi
 //----------------------------------------------------------------------Disparo----------------------------------------------------------------------
 
 
+#define VELOCIDAD_DISPARO_PLAYER 6
+#define POSICION_INICIAL_DISPARO 60
+
 typedef struct{
 
 	uint8_t posicion_x;
 	int8_t posicion_y;
 	uint8_t disparo;
 	uint8_t numero_disparos;
-
 
 }disparo_t;
 
@@ -161,7 +163,7 @@ typedef struct{
 //Funciones Player
 player_t *getPlayer();
 void playerInit();
-void plotPlayer(uint16_t direccion, player_t *player);
+void plotPlayer(uint8_t direccion, player_t *player);
 
 //Funciones Aliens
 alien_t *getAlien(uint8_t fila, uint8_t columna);
@@ -172,6 +174,6 @@ void plotAliens();
 //Funciones disparo Player
 disparo_t *getDisparo();
 void disparoInit();
-void disparar(uint8_t *boton_apretado);
+void disparar();
 
 #endif /* INC_INVADERS_H_ */
