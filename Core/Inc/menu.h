@@ -35,17 +35,12 @@ enum{
 
 	arriba,
 	abajo,
+	derecha,
+	izquierda,
 	nulo
 
 };
 
-enum{
-
-	derecha,
-	izquierda,
-	nulo_
-
-};
 
 
 //Posicion del cursor en el Menú Principal.

@@ -29,9 +29,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  12 .comment      00000043  00000000  00000000  00020041  2**0
                   CONTENTS, READONLY
- 13 .debug_info   00019647  00000000  00000000  00020084  2**0
+ 13 .debug_info   0001964a  00000000  00000000  00020084  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 00003d6a  00000000  00000000  000396cb  2**0
+ 14 .debug_abbrev 00003d6a  00000000  00000000  000396ce  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_aranges 00001848  00000000  00000000  0003d438  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -41,11 +41,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  18 .debug_line   0001cb3c  00000000  00000000  0005a3c3  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0009ad8f  00000000  00000000  00076eff  2**0
+ 19 .debug_str    0009ad89  00000000  00000000  00076eff  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00006628  00000000  00000000  00111c90  2**2
+ 20 .debug_frame  00006628  00000000  00000000  00111c88  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000064  00000000  00000000  001182b8  2**0
+ 21 .debug_line_str 00000064  00000000  00000000  001182b0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -192,7 +192,7 @@ void plotPlayer(uint8_t direccion, player_t *player){
 
 	if(direccion == derecha){
  80001e8:	79fb      	ldrb	r3, [r7, #7]
- 80001ea:	2b00      	cmp	r3, #0
+ 80001ea:	2b02      	cmp	r3, #2
  80001ec:	d10e      	bne.n	800020c <plotPlayer+0x30>
 
 		if(player->posicion_X >= 120){
@@ -220,7 +220,7 @@ void plotPlayer(uint8_t direccion, player_t *player){
 	}
 	else if(direccion == izquierda){
  800020c:	79fb      	ldrb	r3, [r7, #7]
- 800020e:	2b01      	cmp	r3, #1
+ 800020e:	2b03      	cmp	r3, #3
  8000210:	d10d      	bne.n	800022e <plotPlayer+0x52>
 
 		if(player->posicion_X <= 0){
@@ -1928,7 +1928,7 @@ void entryJoystick(void *argument)
  8000cb2:	f5b3 6ffa 	cmp.w	r3, #2000	; 0x7d0
  8000cb6:	d902      	bls.n	8000cbe <entryJoystick+0x62>
 		  joystick.x_value = derecha;
- 8000cb8:	2300      	movs	r3, #0
+ 8000cb8:	2302      	movs	r3, #2
  8000cba:	733b      	strb	r3, [r7, #12]
  8000cbc:	e008      	b.n	8000cd0 <entryJoystick+0x74>
 	  }
@@ -1937,13 +1937,13 @@ void entryJoystick(void *argument)
  8000cc0:	f5b3 6fc8 	cmp.w	r3, #1600	; 0x640
  8000cc4:	d202      	bcs.n	8000ccc <entryJoystick+0x70>
 		  joystick.x_value = izquierda;
- 8000cc6:	2301      	movs	r3, #1
+ 8000cc6:	2303      	movs	r3, #3
  8000cc8:	733b      	strb	r3, [r7, #12]
  8000cca:	e001      	b.n	8000cd0 <entryJoystick+0x74>
 	  }
 	  else{
-		  joystick.x_value = nulo_;
- 8000ccc:	2302      	movs	r3, #2
+		  joystick.x_value = nulo;
+ 8000ccc:	2304      	movs	r3, #4
  8000cce:	733b      	strb	r3, [r7, #12]
 	  }
 
@@ -1968,7 +1968,7 @@ void entryJoystick(void *argument)
 	  }
 	  else{
 		  joystick.y_value = nulo;
- 8000cec:	2302      	movs	r3, #2
+ 8000cec:	2304      	movs	r3, #4
  8000cee:	737b      	strb	r3, [r7, #13]
 	  }
 

@@ -503,7 +503,7 @@ void entryJoystick(void *argument)
 		  joystick.x_value = izquierda;
 	  }
 	  else{
-		  joystick.x_value = nulo_;
+		  joystick.x_value = nulo;
 	  }
 
 
