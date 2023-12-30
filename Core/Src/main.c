@@ -40,8 +40,6 @@ typedef struct{
 }botones_t;
 
 dificultad_t dificultad;
-uint8_t opciones_principal = principal_nulo;
-
 
 /* USER CODE END PTD */
 
@@ -50,6 +48,7 @@ uint8_t opciones_principal = principal_nulo;
 
 void config_ADC_canal0();
 void config_ADC_canal1();
+uint16_t ADC_values[2];
 
 /* USER CODE END PD */
 
@@ -63,6 +62,8 @@ ADC_HandleTypeDef hadc1;
 
 I2C_HandleTypeDef hi2c1;
 
+SPI_HandleTypeDef hspi1;
+
 /* Definitions for JoystickTask */
 osThreadId_t JoystickTaskHandle;
 const osThreadAttr_t JoystickTask_attributes = {
@@ -74,6 +75,13 @@ const osThreadAttr_t JoystickTask_attributes = {
 osThreadId_t PantallaTaskHandle;
 const osThreadAttr_t PantallaTask_attributes = {
   .name = "PantallaTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for MemoriaTask */
+osThreadId_t MemoriaTaskHandle;
+const osThreadAttr_t MemoriaTask_attributes = {
+  .name = "MemoriaTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
@@ -91,8 +99,10 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_SPI1_Init(void);
 void entryJoystick(void *argument);
 void entryPantalla(void *argument);
+void entryMemoria(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -134,6 +144,7 @@ int main(void)
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -168,6 +179,9 @@ int main(void)
   /* creation of PantallaTask */
   PantallaTaskHandle = osThreadNew(entryPantalla, NULL, &PantallaTask_attributes);
 
+  /* creation of MemoriaTask */
+  MemoriaTaskHandle = osThreadNew(entryMemoria, NULL, &MemoriaTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -182,6 +196,7 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -258,12 +273,12 @@ static void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 2;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -274,6 +289,15 @@ static void MX_ADC1_Init(void)
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_1;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -315,6 +339,44 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
 
 }
 
@@ -372,7 +434,7 @@ void config_ADC_canal0(){
 	ADC_ChannelConfTypeDef sConfig = {0};
 
 	  sConfig.Channel = ADC_CHANNEL_0;
-	  sConfig.Rank = ADC_REGULAR_RANK_1;
+	  sConfig.Rank = 1;
 	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
 	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 	  {
@@ -385,7 +447,7 @@ void config_ADC_canal1(){
 	ADC_ChannelConfTypeDef sConfig = {0};
 
 	  sConfig.Channel = ADC_CHANNEL_1;
-	  sConfig.Rank = ADC_REGULAR_RANK_1;
+	  sConfig.Rank = 2;
 	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
 	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 	  {
@@ -411,11 +473,7 @@ void entryJoystick(void *argument)
   /* Infinite loop */
 
 	botones_t joystick;
-	//uint32_t ADC_values[2];
-
 	uint16_t val_x, val_y;
-
-	//HAL_ADC_Start_DMA(&hadc1, ADC_values, sizeof(ADC_values));
 
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
@@ -424,24 +482,19 @@ void entryJoystick(void *argument)
   {
 
 	  //Joystick eje X: derecha o izquierda.
-	  //ADC1->CHSELR  = 0x01;
 	  config_ADC_canal0();
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 10);
 	  val_x = HAL_ADC_GetValue(&hadc1);
 	  HAL_ADC_Stop(&hadc1);
 
-	  /*
+
 	  //Joystick eje Y: arriba o abajo.
-	  //ADC1->CHSELR  = 0x02;
 	  config_ADC_canal1();
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 10);
 	  val_y = HAL_ADC_GetValue(&hadc1);
-	  HAL_ADC_Stop(&hadc1);*/
-
-	  //val_x = ADC_values[0];
-	  //val_y = ADC_values[1];
+	  HAL_ADC_Stop(&hadc1);
 
 	  if(val_x > 2000){
 		  joystick.x_value = derecha;
@@ -450,36 +503,35 @@ void entryJoystick(void *argument)
 		  joystick.x_value = izquierda;
 	  }
 	  else{
-		  joystick.x_value = nuloo;
+		  joystick.x_value = nulo_;
 	  }
 
-	  /*if(val_y > 2000){
-		  joystick.y_value = arriba;
-	  }
-	  else if(val_y < 1800){
+
+	  if(val_y > 2000){
 		  joystick.y_value = abajo;
+	  }
+	  else if(val_y < 1600){
+		  joystick.y_value = arriba;
 	  }
 	  else{
 		  joystick.y_value = nulo;
-	  }*/
-
+	  }
 
 	  //Boton del Joystick.
 
 	  if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_RESET){
-		  joystick.boton = enter;
+		  joystick.boton = true;
 	  }
 	  else{
-		  joystick.boton = nulo;
+		  joystick.boton = false;
 	  }
 
 
 	osStatus_t res = osMessageQueuePut(queueJoystPantHandle, &joystick, 0, 0);
 	if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
-	  vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
+	vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
 
-    //osDelay(1);
   }
   /* USER CODE END 5 */
 }
@@ -503,16 +555,13 @@ void entryPantalla(void *argument)
 
 	//Se inicializan los botones (eje y, eje x del joystick y boton)
 	botones_t joystick;
+	menuInit();
 
-	//Se inicializan las posiciones iniciales del player y de los aliens.
-	playerInit();
-	InvaderInit();
-	disparoInit();
 
+	//Se inicializan las dificultades
 	dificultad.velocidad_horizontal = 1;
 	dificultad.velocidad_bajada = 1;
 
-	menuInit();
 
   for(;;)
   {
@@ -526,34 +575,6 @@ void entryPantalla(void *argument)
 
 		menuActualizar(joystick.x_value, joystick.y_value, joystick.boton);
 
-		//SSD1306_DrawFilledTriangle(40,40, 43, y2, x3, y3, color)
-
-
-
-			/*
-
-			//Se grafican el player, aliens y disparo.
-			plotPlayer(joystick.x_value, getPlayer());
-			plotAliens();
-
-			disparar();
-
-
-
-			//Prender led si se apretó el boton
-			if(joystick.boton == true){
-
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
-				//boton_apretado = 1;
-				getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
-			}
-			else{
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
-			}
-
-			*/
-
-
 	}
 
 
@@ -562,6 +583,24 @@ void entryPantalla(void *argument)
 
   }
   /* USER CODE END entryPantalla */
+}
+
+/* USER CODE BEGIN Header_entryMemoria */
+/**
+* @brief Function implementing the MemoriaTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_entryMemoria */
+void entryMemoria(void *argument)
+{
+  /* USER CODE BEGIN entryMemoria */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END entryMemoria */
 }
 
 /**

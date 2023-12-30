@@ -17,7 +17,7 @@
 typedef struct{
 
 	uint8_t menuActual;
-	uint8_t accion;
+	uint8_t posicion_MenuPrincipal;
 
 }menu_t;
 
@@ -35,30 +35,26 @@ enum{
 
 	arriba,
 	abajo,
-	enter,
 	nulo
 
 };
 
 enum{
 
-	izquierda,
 	derecha,
-	nuloo
+	izquierda,
+	nulo_
+
 };
 
 
-//Dentro del menu principal
-
-extern uint8_t opciones_principal;
-
-enum{
-	principal_jugar,
-	principal_puntajes,
-	principal_nulo
-};
+//Posicion del cursor en el Menú Principal.
+#define POSICION_CURSOR_JUGAR 38
+#define POSICION_CURSOR_PUNTAJES 48
+#define POSICION_CURSOR_X 39
 
 
+//Funciones
 menu_t *getMenu();
 void menuInit();
 void menuActualizar(uint8_t x, uint8_t y, uint8_t boton);

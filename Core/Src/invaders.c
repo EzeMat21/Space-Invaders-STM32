@@ -20,7 +20,6 @@ alien_t Alien[NUM_ALIEN_FILA][NUM_ALIEN_COLUMNA];
 extern dificultad_t dificultad;
 
 
-
 player_t *getPlayer(){
 
 	return &Player;

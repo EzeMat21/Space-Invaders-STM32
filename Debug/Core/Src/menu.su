@@ -1,3 +1,3 @@
 ../Core/Src/menu.c:14:9:getMenu	4	static
 ../Core/Src/menu.c:20:6:menuInit	8	static
-../Core/Src/menu.c:31:6:menuActualizar	32	static
+../Core/Src/menu.c:34:6:menuActualizar	32	static

@@ -19,12 +19,15 @@ menu_t *getMenu(){
 
 void menuInit(){
 
-	getMenu()->menuActual = menu_principal;
+	//Se inicializan las posiciones iniciales del player y de los aliens.
+	playerInit();
+	InvaderInit();
+	disparoInit();
 
-	SSD1306_GotoXY(50, 35);
-	SSD1306_Puts("JUGAR", &Font_7x10, 1);
-	SSD1306_GotoXY(50, 45);
-	SSD1306_Puts("PUNTAJES", &Font_7x10, 1);
+	//Se inicializa el cursor de la pantalla principal.
+	getMenu()->menuActual = menu_principal;
+	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
+
 
 }
 
@@ -43,34 +46,30 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		SSD1306_GotoXY(45, 45);
 		SSD1306_Puts("PUNTAJES", &Font_7x10, 1);
 
-		/*
-		if(x == izquierda){
-			SSD1306_DrawCircle(43, 37, 3, 1);
+
+		if(y == arriba){
+			getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 		}
-		else{
-			SSD1306_DrawCircle(43, 48, 3, 1);
-		}*/
+		else if(y == abajo){
+			getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_PUNTAJES;
+		}
 
-		switch (getMenu()->accion) {
-			case enter:
+		SSD1306_DrawCircle(POSICION_CURSOR_X, getMenu()->posicion_MenuPrincipal, 3, 1);
 
-				if(opciones_principal == principal_jugar ){
 
-					getMenu()->menuActual = juego;
-				}
-
-				else if(opciones_principal == principal_puntajes ){
-
-					getMenu()->menuActual = puntajes;
-				}
-
-				break;
-			case arriba:
-				break;
-			case abajo:
-				break;
-			default:
-				break;
+		switch(boton){
+		case true:
+			if(getMenu()->posicion_MenuPrincipal == POSICION_CURSOR_JUGAR){
+				getMenu()->menuActual = juego;
+			}
+			else if(getMenu()->posicion_MenuPrincipal == POSICION_CURSOR_PUNTAJES){
+				getMenu()->menuActual = puntajes;
+			}
+			break;
+		case false:
+			break;
+		default:
+			break;
 		}
 
 		break;
@@ -87,7 +86,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 
 		//Prender led si se apretó el boton
-		if(boton == enter){
+		if(boton == true){
 
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
 			//boton_apretado = 1;
@@ -105,6 +104,16 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		SSD1306_GotoXY(35, 25);
 		SSD1306_Puts("PUNTAJES", &Font_7x10, 1);
 
+
+		switch(boton){
+		case true:
+				getMenu()->menuActual = menu_principal;
+			break;
+		case false:
+			break;
+		default:
+			break;
+		}
 		break;
 
 //-------------------------------------------------------------- GUARDADO DEL NOMBRE-----------------------------------------------------------------------------
@@ -118,15 +127,6 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		SSD1306_GotoXY(35, 25);
 		SSD1306_Puts("GAME OVER", &Font_7x10, 1);
 
-		getMenu()->accion = boton;
-
-		switch(getMenu()->accion){
-			case enter:
-				getMenu()->menuActual = puntajes;
-				break;
-			default:
-				break;
-		}
 
 		break;
 	default:
