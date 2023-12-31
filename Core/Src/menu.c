@@ -7,9 +7,9 @@
 
 
 #include "menu.h"
-#include "invaders.h"
 
 menu_t menu;
+
 
 menu_t *getMenu(){
 
@@ -33,6 +33,8 @@ void menuInit(){
 
 void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
+
+	uint8_t buffer[2];
 
 	switch(getMenu()->menuActual){
 
@@ -101,15 +103,45 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 //-------------------------------------------------------------- PUNTAJES-----------------------------------------------------------------------------
 	case puntajes:
 
-		SSD1306_GotoXY(35, 25);
+		//Titulo 'Puntajes'
+		SSD1306_GotoXY(35, 0);
 		SSD1306_Puts("PUNTAJES", &Font_7x10, 1);
 
+		//Nombres
+		SSD1306_GotoXY(15, 13);
+		SSD1306_Puts("eze", &Font_7x10, 1);
 
-		switch(boton){
-		case true:
+		SSD1306_GotoXY(15, 23);
+		//osMutexAcquire(mutexPuntajesHandle, osWaitForever);
+
+		SSD1306_Puts(getPuntajes(0)->nombre, &Font_7x10, 1);
+		//osMutexRelease(mutexPuntajesHandle);
+
+
+		SSD1306_GotoXY(15, 33);
+		SSD1306_Puts("xd", &Font_7x10, 1);
+		SSD1306_GotoXY(15, 43);
+		SSD1306_Puts("que onda", &Font_7x10, 1);
+		SSD1306_GotoXY(15, 53);
+		SSD1306_Puts("fiufiu", &Font_7x10, 1);
+
+		//Puntuaciones
+		SSD1306_GotoXY(90, 13);
+		itoa(getPuntajes(0)->puntaje,(char*)buffer,10);
+		SSD1306_Puts((char *)buffer, &Font_7x10, 1);
+		SSD1306_GotoXY(90, 23);
+		SSD1306_Puts("100", &Font_7x10, 1);
+		SSD1306_GotoXY(90, 33);
+		SSD1306_Puts("200", &Font_7x10, 1);
+		SSD1306_GotoXY(90, 43);
+		SSD1306_Puts("300", &Font_7x10, 1);
+		SSD1306_GotoXY(90, 53);
+		SSD1306_Puts("34", &Font_7x10, 1);
+
+
+		switch(y){
+		case arriba:
 				getMenu()->menuActual = menu_principal;
-			break;
-		case false:
 			break;
 		default:
 			break;

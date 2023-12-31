@@ -1,0 +1,4 @@
+../Core/Src/memoria.c:14:13:getPuntajes	1
+../Core/Src/memoria.c:20:9:Write_Memoria	4
+../Core/Src/memoria.c:59:9:Read_memoria	1
+../Core/Src/memoria.c:77:6:memoriaInit	6

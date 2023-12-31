@@ -25,6 +25,7 @@
 
 #include "invaders.h"
 #include "task.h"
+#include "memoria.h"
 
 /* USER CODE END Includes */
 
@@ -40,6 +41,8 @@ typedef struct{
 }botones_t;
 
 dificultad_t dificultad;
+char nombre[5][6];
+
 
 /* USER CODE END PTD */
 
@@ -48,7 +51,6 @@ dificultad_t dificultad;
 
 void config_ADC_canal0();
 void config_ADC_canal1();
-uint16_t ADC_values[2];
 
 /* USER CODE END PD */
 
@@ -59,6 +61,7 @@ uint16_t ADC_values[2];
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc2;
 
 I2C_HandleTypeDef hi2c1;
 
@@ -68,27 +71,32 @@ SPI_HandleTypeDef hspi1;
 osThreadId_t JoystickTaskHandle;
 const osThreadAttr_t JoystickTask_attributes = {
   .name = "JoystickTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for PantallaTask */
 osThreadId_t PantallaTaskHandle;
 const osThreadAttr_t PantallaTask_attributes = {
   .name = "PantallaTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for MemoriaTask */
 osThreadId_t MemoriaTaskHandle;
 const osThreadAttr_t MemoriaTask_attributes = {
   .name = "MemoriaTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for queueJoystPant */
 osMessageQueueId_t queueJoystPantHandle;
 const osMessageQueueAttr_t queueJoystPant_attributes = {
   .name = "queueJoystPant"
+};
+/* Definitions for mutexPuntajes */
+osMutexId_t mutexPuntajesHandle;
+const osMutexAttr_t mutexPuntajes_attributes = {
+  .name = "mutexPuntajes"
 };
 /* USER CODE BEGIN PV */
 
@@ -100,6 +108,7 @@ static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_ADC2_Init(void);
 void entryJoystick(void *argument);
 void entryPantalla(void *argument);
 void entryMemoria(void *argument);
@@ -145,12 +154,16 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
+  MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();
+  /* Create the mutex(es) */
+  /* creation of mutexPuntajes */
+  mutexPuntajesHandle = osMutexNew(&mutexPuntajes_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -273,12 +286,12 @@ static void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
-  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 2;
+  hadc1.Init.NbrOfConversion = 1;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -293,18 +306,56 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief ADC2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC2_Init(void)
+{
+
+  /* USER CODE BEGIN ADC2_Init 0 */
+
+  /* USER CODE END ADC2_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC2_Init 1 */
+
+  /* USER CODE END ADC2_Init 1 */
+
+  /** Common config
+  */
+  hadc2.Instance = ADC2;
+  hadc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc2.Init.ContinuousConvMode = DISABLE;
+  hadc2.Init.DiscontinuousConvMode = DISABLE;
+  hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc2.Init.NbrOfConversion = 1;
+  if (HAL_ADC_Init(&hadc2) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /** Configure Regular Channel
   */
   sConfig.Channel = ADC_CHANNEL_1;
-  sConfig.Rank = ADC_REGULAR_RANK_2;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN ADC1_Init 2 */
+  /* USER CODE BEGIN ADC2_Init 2 */
 
-  /* USER CODE END ADC1_Init 2 */
+  /* USER CODE END ADC2_Init 2 */
 
 }
 
@@ -365,7 +416,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -403,6 +454,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -423,11 +477,20 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PB5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+
+//Con sConfig.Rank = 1; funcionan los dos canales del ADC1.
 
 void config_ADC_canal0(){
 
@@ -447,7 +510,7 @@ void config_ADC_canal1(){
 	ADC_ChannelConfTypeDef sConfig = {0};
 
 	  sConfig.Channel = ADC_CHANNEL_1;
-	  sConfig.Rank = 2;
+	  sConfig.Rank = 1;
 	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
 	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 	  {
@@ -482,19 +545,18 @@ void entryJoystick(void *argument)
   {
 
 	  //Joystick eje X: derecha o izquierda.
-	  config_ADC_canal0();
+	  //config_ADC_canal0();
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 10);
 	  val_x = HAL_ADC_GetValue(&hadc1);
 	  HAL_ADC_Stop(&hadc1);
 
-
 	  //Joystick eje Y: arriba o abajo.
-	  config_ADC_canal1();
-	  HAL_ADC_Start(&hadc1);
-	  HAL_ADC_PollForConversion(&hadc1, 10);
-	  val_y = HAL_ADC_GetValue(&hadc1);
-	  HAL_ADC_Stop(&hadc1);
+	  //config_ADC_canal1();
+	  HAL_ADC_Start(&hadc2);
+	  HAL_ADC_PollForConversion(&hadc2, 10);
+	  val_y = HAL_ADC_GetValue(&hadc2);
+	  HAL_ADC_Stop(&hadc2);
 
 	  if(val_x > 2000){
 		  joystick.x_value = derecha;
@@ -562,7 +624,6 @@ void entryPantalla(void *argument)
 	dificultad.velocidad_horizontal = 1;
 	dificultad.velocidad_bajada = 1;
 
-
   for(;;)
   {
 	osStatus_t res = osMessageQueueGet(queueJoystPantHandle, &joystick, 0 , osWaitForever);	//Se espera a recibir los valores de los botones del joystick
@@ -595,6 +656,90 @@ void entryPantalla(void *argument)
 void entryMemoria(void *argument)
 {
   /* USER CODE BEGIN entryMemoria */
+
+	//memoriaInit();
+
+
+		//Tengo que hacer un ordenamiento de un vector de 5 para acomodar los puntajes de mayor a menor.
+
+		//------------------------------------------------------------
+			uint16_t address = MEMORIA_ADDRESS + 8;
+
+			char buffer[6];
+			char buffer_retorno[40];
+			//char buffer_retorno1[6];
+			strcpy(buffer, "lindo");
+
+			uint8_t error[10];
+			uint16_t puntaje1 = 1000;
+			uint16_t puntajes;
+
+			uint8_t i=0;
+
+			error[i] = Write_Memoria(address, buffer[i]);
+
+			do{
+
+				if(i== 6){
+					error[i] = Write_Memoria(address, puntaje1>>8);
+				}
+				if(i==7){
+					error[i] = Write_Memoria(address, puntaje1);
+				}
+				else{
+					error[i] = Write_Memoria(address, buffer[i]);
+				}
+
+				i++;
+				address++;
+				HAL_Delay(10);
+
+
+
+			}while(i != 9);
+
+			address = MEMORIA_ADDRESS + 8;
+			i=0;
+			//uint8_t puntaje[2];
+
+
+			//osMutexAcquire(mutexPuntajesHandle, osWaitForever);
+
+			buffer_retorno[i]  = Read_memoria(address);
+
+			do{
+
+				if( (i>=0 && i<6) &&  (buffer_retorno[i] != '\0')){
+					buffer_retorno[i]  = Read_memoria(address);
+					HAL_Delay(10);
+
+					if(buffer_retorno[i] == '\0'){
+						strcpy(getPuntajes(0)->nombre, buffer_retorno);
+					}
+				}
+				else if(i>=6 && i<8){
+
+					buffer_retorno[i] = Read_memoria(address);
+
+					if(i == 7){
+						puntajes = (buffer_retorno[6]<<8) + buffer_retorno[7];
+						getPuntajes(0)->puntaje = puntajes;
+					}
+				}
+
+				i++;
+				address++;
+
+			}while(i != 9);
+
+
+			//osMutexRelease(mutexPuntajesHandle);
+
+
+			i = 0;
+
+
+
   /* Infinite loop */
   for(;;)
   {

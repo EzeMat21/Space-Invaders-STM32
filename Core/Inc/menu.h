@@ -12,7 +12,12 @@
 
 
 #include "ssd1306.h"
+#include "invaders.h"
+#include "memoria.h"
+#include "cmsis_os.h"
 
+
+extern osMutexId_t mutexPuntajesHandle;
 
 typedef struct{
 
