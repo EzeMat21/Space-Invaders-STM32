@@ -29,7 +29,7 @@ Core/Src/menu.o: ../Core/Src/menu.c ../Core/Inc/menu.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Core/Inc/fonts.h ../Core/Inc/invaders.h ../Core/Inc/menu.h \
- ../Core/Inc/memoria.h ../Core/Inc/main.h \
+ ../Core/Inc/figuras.h ../Core/Inc/memoria.h ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
@@ -72,6 +72,7 @@ Core/Src/menu.o: ../Core/Src/menu.c ../Core/Inc/menu.h \
 ../Core/Inc/fonts.h:
 ../Core/Inc/invaders.h:
 ../Core/Inc/menu.h:
+../Core/Inc/figuras.h:
 ../Core/Inc/memoria.h:
 ../Core/Inc/main.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:

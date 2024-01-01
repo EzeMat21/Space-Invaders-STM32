@@ -13,7 +13,11 @@
 #include "main.h"
 #include "string.h"
 #include <stdlib.h>
+#include "cmsis_os.h"
 
+
+#define true 1
+#define false 0
 
 typedef struct{
 
@@ -22,7 +26,7 @@ typedef struct{
 
 }puntajes_t;
 
-
+extern osMutexId_t mutexPuntajesHandle;
 extern SPI_HandleTypeDef hspi1;
 
 //opcodes
@@ -40,10 +44,12 @@ extern SPI_HandleTypeDef hspi1;
 
 
 puntajes_t *getPuntajes(uint8_t indice);
-uint8_t Write_Memoria(uint16_t address, uint8_t value);
+void Write_Memoria(uint16_t address, uint8_t value);
 uint8_t Read_memoria(uint16_t address);
-
 void memoriaInit();
+
+
+void Ordenamiento_Puntajes();
 
 
 #endif /* INC_MEMORIA_H_ */

@@ -49,9 +49,6 @@ char nombre[5][6];
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-void config_ADC_canal0();
-void config_ADC_canal1();
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -86,7 +83,7 @@ osThreadId_t MemoriaTaskHandle;
 const osThreadAttr_t MemoriaTask_attributes = {
   .name = "MemoriaTask",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for queueJoystPant */
 osMessageQueueId_t queueJoystPantHandle;
@@ -490,37 +487,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-//Con sConfig.Rank = 1; funcionan los dos canales del ADC1.
-
-void config_ADC_canal0(){
-
-	ADC_ChannelConfTypeDef sConfig = {0};
-
-	  sConfig.Channel = ADC_CHANNEL_0;
-	  sConfig.Rank = 1;
-	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-	  {
-	    Error_Handler();
-	  }
-}
-
-void config_ADC_canal1(){
-
-	ADC_ChannelConfTypeDef sConfig = {0};
-
-	  sConfig.Channel = ADC_CHANNEL_1;
-	  sConfig.Rank = 1;
-	  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-	  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-	  {
-	    Error_Handler();
-	  }
-}
-
-
-
-
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_entryJoystick */
@@ -545,14 +511,12 @@ void entryJoystick(void *argument)
   {
 
 	  //Joystick eje X: derecha o izquierda.
-	  //config_ADC_canal0();
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 10);
 	  val_x = HAL_ADC_GetValue(&hadc1);
 	  HAL_ADC_Stop(&hadc1);
 
 	  //Joystick eje Y: arriba o abajo.
-	  //config_ADC_canal1();
 	  HAL_ADC_Start(&hadc2);
 	  HAL_ADC_PollForConversion(&hadc2, 10);
 	  val_y = HAL_ADC_GetValue(&hadc2);
@@ -657,88 +621,13 @@ void entryMemoria(void *argument)
 {
   /* USER CODE BEGIN entryMemoria */
 
-	//memoriaInit();
 
+	osMutexAcquire(mutexPuntajesHandle, osWaitForever);
 
-		//Tengo que hacer un ordenamiento de un vector de 5 para acomodar los puntajes de mayor a menor.
+	memoriaInit();
+	//Ordenamiento_Puntajes();
 
-		//------------------------------------------------------------
-			uint16_t address = MEMORIA_ADDRESS + 8;
-
-			char buffer[6];
-			char buffer_retorno[40];
-			//char buffer_retorno1[6];
-			strcpy(buffer, "lindo");
-
-			uint8_t error[10];
-			uint16_t puntaje1 = 1000;
-			uint16_t puntajes;
-
-			uint8_t i=0;
-
-			error[i] = Write_Memoria(address, buffer[i]);
-
-			do{
-
-				if(i== 6){
-					error[i] = Write_Memoria(address, puntaje1>>8);
-				}
-				if(i==7){
-					error[i] = Write_Memoria(address, puntaje1);
-				}
-				else{
-					error[i] = Write_Memoria(address, buffer[i]);
-				}
-
-				i++;
-				address++;
-				HAL_Delay(10);
-
-
-
-			}while(i != 9);
-
-			address = MEMORIA_ADDRESS + 8;
-			i=0;
-			//uint8_t puntaje[2];
-
-
-			//osMutexAcquire(mutexPuntajesHandle, osWaitForever);
-
-			buffer_retorno[i]  = Read_memoria(address);
-
-			do{
-
-				if( (i>=0 && i<6) &&  (buffer_retorno[i] != '\0')){
-					buffer_retorno[i]  = Read_memoria(address);
-					HAL_Delay(10);
-
-					if(buffer_retorno[i] == '\0'){
-						strcpy(getPuntajes(0)->nombre, buffer_retorno);
-					}
-				}
-				else if(i>=6 && i<8){
-
-					buffer_retorno[i] = Read_memoria(address);
-
-					if(i == 7){
-						puntajes = (buffer_retorno[6]<<8) + buffer_retorno[7];
-						getPuntajes(0)->puntaje = puntajes;
-					}
-				}
-
-				i++;
-				address++;
-
-			}while(i != 9);
-
-
-			//osMutexRelease(mutexPuntajesHandle);
-
-
-			i = 0;
-
-
+	osMutexRelease(mutexPuntajesHandle);
 
   /* Infinite loop */
   for(;;)

@@ -25,7 +25,7 @@ void menuInit(){
 	disparoInit();
 
 	//Se inicializa el cursor de la pantalla principal.
-	getMenu()->menuActual = menu_principal;
+	getMenu()->menuActual = guardar_nombre;
 	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 
 
@@ -33,8 +33,6 @@ void menuInit(){
 
 void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
-
-	uint8_t buffer[2];
 
 	switch(getMenu()->menuActual){
 
@@ -107,36 +105,36 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		SSD1306_GotoXY(35, 0);
 		SSD1306_Puts("PUNTAJES", &Font_7x10, 1);
 
+		uint8_t posicion;
+		uint8_t buffer[2];
+
+		osMutexAcquire(mutexPuntajesHandle, osWaitForever);
+
+		//char buff_retorno[5][6];
+
 		//Nombres
-		SSD1306_GotoXY(15, 13);
-		SSD1306_Puts("eze", &Font_7x10, 1);
 
-		SSD1306_GotoXY(15, 23);
-		//osMutexAcquire(mutexPuntajesHandle, osWaitForever);
+		for(uint8_t j=0; j<5;j++){
 
-		SSD1306_Puts(getPuntajes(0)->nombre, &Font_7x10, 1);
-		//osMutexRelease(mutexPuntajesHandle);
+			posicion = j*10 + 13;
 
+			SSD1306_GotoXY(15, posicion);
+			//strcpy(buff_retorno[j], "jdsa");
+			SSD1306_Puts(getPuntajes(j)->nombre, &Font_7x10, 1);
+		}
 
-		SSD1306_GotoXY(15, 33);
-		SSD1306_Puts("xd", &Font_7x10, 1);
-		SSD1306_GotoXY(15, 43);
-		SSD1306_Puts("que onda", &Font_7x10, 1);
-		SSD1306_GotoXY(15, 53);
-		SSD1306_Puts("fiufiu", &Font_7x10, 1);
 
 		//Puntuaciones
-		SSD1306_GotoXY(90, 13);
-		itoa(getPuntajes(0)->puntaje,(char*)buffer,10);
-		SSD1306_Puts((char *)buffer, &Font_7x10, 1);
-		SSD1306_GotoXY(90, 23);
-		SSD1306_Puts("100", &Font_7x10, 1);
-		SSD1306_GotoXY(90, 33);
-		SSD1306_Puts("200", &Font_7x10, 1);
-		SSD1306_GotoXY(90, 43);
-		SSD1306_Puts("300", &Font_7x10, 1);
-		SSD1306_GotoXY(90, 53);
-		SSD1306_Puts("34", &Font_7x10, 1);
+		for(uint8_t j=0; j<5;j++){
+
+			posicion = j*10 + 13;
+
+			SSD1306_GotoXY(90, posicion);
+			itoa(getPuntajes(j)->puntaje,(char*)buffer,10);
+			SSD1306_Puts((char *)buffer, &Font_7x10, 1);
+		}
+
+		osMutexRelease(mutexPuntajesHandle);
 
 
 		switch(y){
@@ -150,6 +148,73 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 //-------------------------------------------------------------- GUARDADO DEL NOMBRE-----------------------------------------------------------------------------
 	case guardar_nombre:
+
+
+		char buff_qwerty[] = "qwertyuiop";
+		char buff_asdf[] = "asdfghjkl";
+		char buff_zxc[] = "zxcvbnm";
+
+		uint8_t posicion_x;
+
+		SSD1306_DrawRectangle(35, 0, 50, 15, 1);
+		SSD1306_GotoXY(37, 5);
+		SSD1306_Puts("capaz", &Font_7x10, 1);
+
+
+			for(uint8_t i=0;i<10;i++){
+
+				posicion_x = i*(12) + 6;
+
+				SSD1306_GotoXY(posicion_x, 23);
+				SSD1306_Putc(buff_qwerty[i], &Font_7x10, 1);
+				SSD1306_GotoXY(posicion_x, 38);
+				SSD1306_Putc(buff_asdf[i], &Font_7x10, 1);
+
+			}
+
+
+			for(uint8_t i=0;i<7;i++){
+
+				posicion_x = i*(12) + 18;
+
+				SSD1306_GotoXY(posicion_x, 53);
+				SSD1306_Putc(buff_zxc[i], &Font_7x10, 1);
+			}
+
+			SSD1306_DrawLine(6, 23 + 10, 12, 23+10, 1);
+
+
+			switch(y){
+				case arriba:
+
+					break;
+
+				case abajo:
+					break;
+				default:
+					break;
+				}
+				break;
+
+			switch(x){
+				case izquierda:
+
+					break;
+				case derecha:
+					break;
+				default:
+					break;
+				}
+				break;
+
+
+				if(boton == true){
+
+				}
+				else{
+
+				}
+
 		break;
 
 
@@ -166,4 +231,14 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
 
