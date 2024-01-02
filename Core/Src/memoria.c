@@ -60,6 +60,9 @@ uint8_t Read_memoria(uint16_t address)
 
 void memoriaInit(){
 
+
+		puntajesActualizar();
+
 		char buff_nombre[7];
 
 		uint16_t address = MEMORIA_ADDRESS;
@@ -71,8 +74,11 @@ void memoriaInit(){
 		uint8_t puntaje_msb;
 		uint8_t byte_dumb;
 
-		puntaje_msb  = Read_memoria(address);
+
+		buff_nombre[0]  = Read_memoria(address);
 		HAL_Delay(3);
+
+		strcpy(buff_nombre, "      ");
 
 		do{
 
@@ -164,15 +170,15 @@ void memoriaInit(){
 void puntajesActualizar(){		//Actualizar los puntajes y guardarlos en memoria
 
 
-	uint16_t address = MEMORIA_ADDRESS + 32;
+	uint16_t address = MEMORIA_ADDRESS+24;
 
 	char buffer[6];
 
 
-	strcpy(buffer, "pepe");
+	strcpy(buffer, "boris");
 
 
-	uint16_t puntaje1 = 2450;
+	uint16_t puntaje1 = 121;
 
 	uint8_t i=0;
 
@@ -199,6 +205,7 @@ void puntajesActualizar(){		//Actualizar los puntajes y guardarlos en memoria
 }
 
 
+//Hay que corregir el ordenamiento de puntajes.
 
 void Ordenamiento_Puntajes(){
 

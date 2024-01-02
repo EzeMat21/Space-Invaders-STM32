@@ -13,6 +13,8 @@
 #include "invaders.h"
 #include "memoria.h"
 
+#include "task.h"
+
 
 #define true 1
 #define false 0
@@ -20,11 +22,24 @@
 
 typedef struct{
 
+	uint8_t posicion_x;
+	uint8_t posicion_y;
+	TickType_t xLastWakeTime_x;
+	TickType_t xLastWakeTime_y;
+
+}posicion_cursor_t;
+
+
+typedef struct{
+
 	uint8_t menuActual;
 	uint8_t posicion_MenuPrincipal;
+	posicion_cursor_t GuardarNombre;
+
 
 }menu_t;
 
+//Los diferentes menu en los que accede menuActual.
 enum{
 
 	menu_principal,
@@ -35,6 +50,7 @@ enum{
 
 };
 
+//Esto para interpretar los botones del joystick.
 enum{
 
 	arriba,
@@ -44,6 +60,26 @@ enum{
 	nulo
 
 };
+
+
+//Posicion del cursor en el menú Guardado de nombre
+#define GUARDADO_OFFSET_X_CURSOR 12
+#define GUARDADO_POSICION_X_INICIAL 9
+#define GUARDADO_POSICION_X_FINAL 117
+
+#define GUARDADO_POSICION_X3_INICIAL 28
+#define GUARDADO_POSICION_X3_FINAL GUARDADO_POSICION_X3_INICIAL + 6*GUARDADO_OFFSET_X_CURSOR
+//#define GUARDADO_POSICION_X3_FINAL 117
+
+#define GUARDADO_POSICION_X_BORRAR 11
+#define GUARDADO_POSICION_X_ENTER GUARDADO_POSICION_X_FINAL-1
+
+#define GUARDADO_POSICION_Y1 27
+#define GUARDADO_POSICION_Y2 42
+#define GUARDADO_POSICION_Y3 57
+
+
+
 
 
 //Posicion del cursor en el Menú Principal.

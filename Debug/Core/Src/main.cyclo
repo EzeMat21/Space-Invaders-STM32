@@ -8,5 +8,5 @@
 ../Core/Src/main.c:499:6:entryJoystick	7
 ../Core/Src/main.c:572:6:entryPantalla	2
 ../Core/Src/main.c:620:6:entryMemoria	1
-../Core/Src/main.c:648:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:665:6:Error_Handler	1
+../Core/Src/main.c:650:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:667:6:Error_Handler	1

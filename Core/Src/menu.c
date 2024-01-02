@@ -29,6 +29,11 @@ void menuInit(){
 	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 
 
+	//Se inicializa el cursor de la pantalla Guardado de nombre
+	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL;
+	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y3;
+
+
 }
 
 void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
@@ -108,7 +113,9 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		uint8_t posicion;
 		uint8_t buffer[2];
 
-		osMutexAcquire(mutexPuntajesHandle, osWaitForever);
+		//	EN PRINICIPIO, EL PUNTERO A LA STRUCT getPuntajes() SOLO SERÁ LEIDO POR LA TAREA MENU/PANTALLA.
+		//	TODAS AQUELLAS ESCRITURAS DE LA VARIABLE SE REALIZARÁN EN LA TAREA MEMORIA. POR TANTO NO SERÁ NECESARIO UTILIZAR
+		// 	UN MUTEX.
 
 		//char buff_retorno[5][6];
 
@@ -134,8 +141,6 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			SSD1306_Puts((char *)buffer, &Font_7x10, 1);
 		}
 
-		osMutexRelease(mutexPuntajesHandle);
-
 
 		switch(y){
 		case arriba:
@@ -146,19 +151,21 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		}
 		break;
 
+
 //-------------------------------------------------------------- GUARDADO DEL NOMBRE-----------------------------------------------------------------------------
 	case guardar_nombre:
 
-
 		char buff_qwerty[] = "qwertyuiop";
-		char buff_asdf[] = "asdfghjkl";
+		char buff_asdf[] = "asdfghjkl@";
 		char buff_zxc[] = "zxcvbnm";
+		char enter = '<';
+		char borrar = 'x';
 
 		uint8_t posicion_x;
 
-		SSD1306_DrawRectangle(35, 0, 50, 15, 1);
-		SSD1306_GotoXY(37, 5);
-		SSD1306_Puts("capaz", &Font_7x10, 1);
+		SSD1306_DrawRectangle(30, 0, 60, 15, 1);
+		//SSD1306_GotoXY(43, 5);
+		//SSD1306_Puts("capaz", &Font_7x10, 1);
 
 
 			for(uint8_t i=0;i<10;i++){
@@ -175,38 +182,178 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 			for(uint8_t i=0;i<7;i++){
 
-				posicion_x = i*(12) + 18;
+				posicion_x = i*(12) + 26;
 
 				SSD1306_GotoXY(posicion_x, 53);
 				SSD1306_Putc(buff_zxc[i], &Font_7x10, 1);
 			}
 
-			SSD1306_DrawLine(6, 23 + 10, 12, 23+10, 1);
+			//BOTON BORRAR
+			SSD1306_DrawRectangle(3, 50, 16, 16, 1);
+			SSD1306_GotoXY(8, 53);
+			SSD1306_Putc(borrar, &Font_7x10, 1);
 
+			//BOTON ENTER
+			SSD1306_DrawRectangle(108, 50, 16, 16, 1);
+			SSD1306_GotoXY(113, 53);
+			SSD1306_Putc(enter, &Font_7x10, 1);
+
+			uint8_t mov;
 
 			switch(y){
+
+			case arriba:
+				mov = arriba;
+				break;
+			case abajo:
+				mov = abajo;
+				break;
+			case nulo:
+				mov = x;
+				break;
+
+			}
+
+			int8_t div;
+
+			uint8_t posicion_debug;
+
+			TickType_t Timenow;
+			Timenow = xTaskGetTickCount();
+
+			//Este if es para generar un retraso al mover el cursor en el eje x como en el ya que sino se mueve demasiado rapido.
+			if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_y) > pdMS_TO_TICKS(150)){
+
+				getMenu()->GuardarNombre.xLastWakeTime_y = xTaskGetTickCount();
+
+			switch(mov){
 				case arriba:
+
+					switch(getMenu()->GuardarNombre.posicion_y){
+						case GUARDADO_POSICION_Y2:
+							getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
+							break;
+
+						case GUARDADO_POSICION_Y3:
+
+							getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y2;
+
+							if(getMenu()->GuardarNombre.posicion_x >= GUARDADO_POSICION_X3_INICIAL ){
+
+								div = getMenu()->GuardarNombre.posicion_x - (GUARDADO_POSICION_X3_INICIAL);
+
+								if(div < 0) getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+
+								else{
+
+									div = div / GUARDADO_OFFSET_X_CURSOR;
+
+									 getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL + (div+1)*GUARDADO_OFFSET_X_CURSOR ;
+									}
+								}
+
+							break;
+
+					}
 
 					break;
 
 				case abajo:
+
+					switch(getMenu()->GuardarNombre.posicion_y){
+						case GUARDADO_POSICION_Y1:
+							getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y2;
+							break;
+
+						case GUARDADO_POSICION_Y2:
+							getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y3;
+
+							div = getMenu()->GuardarNombre.posicion_x - (GUARDADO_POSICION_X_INICIAL);
+							div = div/GUARDADO_OFFSET_X_CURSOR;
+
+							if(div == 0){
+								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
+							}
+							else if(div == 8 || div == 9){
+								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_ENTER;
+							}
+							else{
+								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL + (div-1)*GUARDADO_OFFSET_X_CURSOR;
+							}
+
+							break;
+
+						default:
+							break;
+						}
+
 					break;
 				default:
 					break;
 				}
-				break;
 
-			switch(x){
+			}
+
+			//Este if es para generar un retraso al mover el cursor en el eje x como en el ya que sino se mueve demasiado rapido.
+		if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_x) > pdMS_TO_TICKS(100)){
+
+			getMenu()->GuardarNombre.xLastWakeTime_x= xTaskGetTickCount();
+
+			switch(mov){
 				case izquierda:
+
+					getMenu()->GuardarNombre.posicion_x = getMenu()->GuardarNombre.posicion_x - GUARDADO_OFFSET_X_CURSOR;
+
+					if(getMenu()->GuardarNombre.posicion_y != GUARDADO_POSICION_Y3){
+
+						if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_INICIAL - GUARDADO_OFFSET_X_CURSOR)){
+							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_FINAL;
+						}
+					}
+					else{
+						if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X3_INICIAL - GUARDADO_OFFSET_X_CURSOR) ){
+
+							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
+						}
+						else if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_ENTER - GUARDADO_OFFSET_X_CURSOR)){
+
+							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_FINAL;
+						}
+
+						else if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_BORRAR - GUARDADO_OFFSET_X_CURSOR)){
+
+							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_ENTER;
+						}
+					}
 
 					break;
 				case derecha:
+
+					getMenu()->GuardarNombre.posicion_x = getMenu()->GuardarNombre.posicion_x + GUARDADO_OFFSET_X_CURSOR;
+
+					if(getMenu()->GuardarNombre.posicion_y != GUARDADO_POSICION_Y3){
+
+						if(getMenu()->GuardarNombre.posicion_x > GUARDADO_POSICION_X_FINAL){
+								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+						}
+					}
+					else{
+
+						if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X3_FINAL + GUARDADO_OFFSET_X_CURSOR)){
+							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_ENTER;
+						}
+						else if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_ENTER + GUARDADO_OFFSET_X_CURSOR)){
+							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
+						}
+						else if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_BORRAR + GUARDADO_OFFSET_X_CURSOR)){
+							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL;
+						}
+					}
+
 					break;
 				default:
 					break;
 				}
-				break;
-
 
 				if(boton == true){
 
@@ -214,6 +361,11 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 				else{
 
 				}
+
+			}
+				//Se actualiza el cursor
+				SSD1306_DrawFilledCircle(getMenu()->GuardarNombre.posicion_x,  getMenu()->GuardarNombre.posicion_y, 5, 1);
+
 
 		break;
 

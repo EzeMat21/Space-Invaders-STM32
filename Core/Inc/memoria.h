@@ -50,6 +50,7 @@ void memoriaInit();
 
 
 void Ordenamiento_Puntajes();
+void puntajesActualizar();
 
 
 #endif /* INC_MEMORIA_H_ */

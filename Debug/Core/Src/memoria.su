@@ -2,5 +2,5 @@
 ../Core/Src/memoria.c:18:6:Write_Memoria	24	static
 ../Core/Src/memoria.c:43:9:Read_memoria	24	static
 ../Core/Src/memoria.c:61:6:memoriaInit	32	static
-../Core/Src/memoria.c:164:6:puntajesActualizar	24	static
-../Core/Src/memoria.c:203:6:Ordenamiento_Puntajes	104	static
+../Core/Src/memoria.c:170:6:puntajesActualizar	24	static
+../Core/Src/memoria.c:210:6:Ordenamiento_Puntajes	104	static

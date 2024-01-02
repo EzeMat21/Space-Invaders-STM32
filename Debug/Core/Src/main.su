@@ -8,5 +8,5 @@
 ../Core/Src/main.c:499:6:entryJoystick	32	static
 ../Core/Src/main.c:572:6:entryPantalla	24	static
 ../Core/Src/main.c:620:6:entryMemoria	16	static
-../Core/Src/main.c:648:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:665:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:650:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:667:6:Error_Handler	4	static,ignoring_inline_asm
