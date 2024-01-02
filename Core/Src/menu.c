@@ -30,8 +30,8 @@ void menuInit(){
 
 
 	//Se inicializa el cursor de la pantalla Guardado de nombre
-	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL;
-	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y3;
+	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
 
 
 }
@@ -198,25 +198,28 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			SSD1306_GotoXY(113, 53);
 			SSD1306_Putc(enter, &Font_7x10, 1);
 
-			uint8_t mov;
 
+			//Esto es algo "raro" que hice. En lugar de procesar el eje x y el eje y del joystick a la vez, voy a definir una variable mov
+			//la cual solo puede tomar el valor de x o el valor de y, es decir, tomara los valores de (arriba, abajo, der,izq, nulo)
+
+			uint8_t mov;
 			switch(y){
 
-			case arriba:
-				mov = arriba;
-				break;
-			case abajo:
-				mov = abajo;
-				break;
-			case nulo:
-				mov = x;
-				break;
+				case arriba:
+					mov = arriba;
+					break;
+				case abajo:
+					mov = abajo;
+					break;
+				case nulo:
+					mov = x;
+					break;
 
 			}
 
 			int8_t div;
 
-			uint8_t posicion_debug;
+			//uint8_t posicion_debug;
 
 			TickType_t Timenow;
 			Timenow = xTaskGetTickCount();
@@ -251,6 +254,9 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 									 getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL + (div+1)*GUARDADO_OFFSET_X_CURSOR ;
 									}
 								}
+							else{
+								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+							}
 
 							break;
 
@@ -294,6 +300,8 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 			}
 
+			Timenow = xTaskGetTickCount();
+
 			//Este if es para generar un retraso al mover el cursor en el eje x como en el ya que sino se mueve demasiado rapido.
 		if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_x) > pdMS_TO_TICKS(100)){
 
@@ -322,7 +330,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 						else if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_BORRAR - GUARDADO_OFFSET_X_CURSOR)){
 
-							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_ENTER;
+							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
 						}
 					}
 
@@ -355,16 +363,87 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 					break;
 				}
 
-				if(boton == true){
+
+
+			uint8_t indice_debug;
+
+
+			if((boton == true) && (getMenu()->GuardarNombre.indice < 5)){
+
+						if((getMenu()->GuardarNombre.posicion_y != GUARDADO_POSICION_Y3)){
+
+							div = getMenu()->GuardarNombre.posicion_x - GUARDADO_POSICION_X_INICIAL;
+							div = div / (GUARDADO_OFFSET_X_CURSOR);
+
+							if((getMenu()->GuardarNombre.posicion_y == GUARDADO_POSICION_Y1)){
+								getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = buff_qwerty[div];
+								getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice + 1;
+
+							}
+							else if((getMenu()->GuardarNombre.posicion_y == GUARDADO_POSICION_Y2)){
+								getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = buff_asdf[div];
+								getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice + 1;
+							}
+
+						}
+
+
+						else{
+
+							div = getMenu()->GuardarNombre.posicion_x - GUARDADO_POSICION_X3_INICIAL;
+
+							if(div < 0){	//Corresponde a la X de borrar caracter.
+
+
+								indice_debug = getMenu()->GuardarNombre.indice;
+
+								getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice - 1;
+								getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = '\0';
+
+								if(getMenu()->GuardarNombre.indice < 0){
+									getMenu()->GuardarNombre.indice = 0;
+								}
+
+							}
+							else{
+								div = div / GUARDADO_OFFSET_X_CURSOR;
+
+									if(div == 7){	//Estamos en enter.
+
+										strcpy(getPuntajes(4)->nombre,getMenu()->GuardarNombre.nombre);
+										getMenu()->menuActual = puntajes;
+									}
+									else{
+
+										getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = buff_zxc[div];
+										getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice + 1;
+
+										indice_debug = getMenu()->GuardarNombre.indice;
+
+									}
+
+								}
+
+
+							}
+
+						if(getMenu()->GuardarNombre.indice >= 5){
+							getMenu()->GuardarNombre.indice = 4;
+						}
 
 				}
-				else{
 
-				}
 
-			}
+		}
+
+
+
+
 				//Se actualiza el cursor
 				SSD1306_DrawFilledCircle(getMenu()->GuardarNombre.posicion_x,  getMenu()->GuardarNombre.posicion_y, 5, 1);
+
+				SSD1306_GotoXY(43, 5);
+				SSD1306_Puts(getMenu()->GuardarNombre.nombre, &Font_7x10, 1);
 
 
 		break;
@@ -381,6 +460,16 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 	default:
 		break;
 	}
+
+}
+
+
+void menuGuardaNombre_Reset(){
+
+	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL;
+	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y3;
+	getMenu()->GuardarNombre.indice = 0;
+	strcpy(getMenu()->GuardarNombre.nombre,"     ");
 
 }
 

@@ -15,7 +15,6 @@
 
 #include "task.h"
 
-
 #define true 1
 #define false 0
 
@@ -24,17 +23,19 @@ typedef struct{
 
 	uint8_t posicion_x;
 	uint8_t posicion_y;
+	char nombre[6];
+	uint8_t indice;
 	TickType_t xLastWakeTime_x;
 	TickType_t xLastWakeTime_y;
 
-}posicion_cursor_t;
+}cursor_t;
 
 
 typedef struct{
 
 	uint8_t menuActual;
 	uint8_t posicion_MenuPrincipal;
-	posicion_cursor_t GuardarNombre;
+	cursor_t GuardarNombre;
 
 
 }menu_t;
@@ -77,8 +78,6 @@ enum{
 #define GUARDADO_POSICION_Y1 27
 #define GUARDADO_POSICION_Y2 42
 #define GUARDADO_POSICION_Y3 57
-
-
 
 
 
