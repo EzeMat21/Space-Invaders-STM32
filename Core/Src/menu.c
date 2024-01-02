@@ -32,6 +32,8 @@ void menuInit(){
 	//Se inicializa el cursor de la pantalla Guardado de nombre
 	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
 	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
+	getMenu()->GuardarNombre.indice = 0;
+
 
 
 }
@@ -219,7 +221,6 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 			int8_t div;
 
-			//uint8_t posicion_debug;
 
 			TickType_t Timenow;
 			Timenow = xTaskGetTickCount();
@@ -365,10 +366,11 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 
 
-			uint8_t indice_debug;
+			//uint8_t indice_debug;
+			//uint8_t buffer_debug[6];
 
 
-			if((boton == true) && (getMenu()->GuardarNombre.indice < 5)){
+			if((boton == true) && (getMenu()->GuardarNombre.indice <= 5)){
 
 						if((getMenu()->GuardarNombre.posicion_y != GUARDADO_POSICION_Y3)){
 
@@ -392,33 +394,43 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 							div = getMenu()->GuardarNombre.posicion_x - GUARDADO_POSICION_X3_INICIAL;
 
-							if(div < 0){	//Corresponde a la X de borrar caracter.
+							if(div < 0){	//SI SE APRIETA EL BOTON BORRAR
 
 
-								indice_debug = getMenu()->GuardarNombre.indice;
+								//indice_debug = getMenu()->GuardarNombre.indice;
+								//strcpy(buffer_debug,getMenu()->GuardarNombre.nombre );
 
 								getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice - 1;
+								if(getMenu()->GuardarNombre.indice < 0){
+										getMenu()->GuardarNombre.indice = 0;
+									}
+
 								getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = '\0';
 
-								if(getMenu()->GuardarNombre.indice < 0){
-									getMenu()->GuardarNombre.indice = 0;
-								}
+								//indice_debug = getMenu()->GuardarNombre.indice;
+								//strcpy(buffer_debug,getMenu()->GuardarNombre.nombre );
 
 							}
 							else{
 								div = div / GUARDADO_OFFSET_X_CURSOR;
 
-									if(div == 7){	//Estamos en enter.
+								//indice_debug = getMenu()->GuardarNombre.indice;
 
-										strcpy(getPuntajes(4)->nombre,getMenu()->GuardarNombre.nombre);
-										getMenu()->menuActual = puntajes;
+									if(div == 7){	//SI SE APRIETA EL BOTON ENTER
+
+										if((getMenu()->GuardarNombre.indice != 0 )){
+
+											strcpy(getPuntajes(4)->nombre,getMenu()->GuardarNombre.nombre);
+											getMenu()->menuActual = puntajes;
+
+										}
 									}
 									else{
 
 										getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = buff_zxc[div];
 										getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice + 1;
 
-										indice_debug = getMenu()->GuardarNombre.indice;
+										//indice_debug = getMenu()->GuardarNombre.indice;
 
 									}
 
@@ -427,8 +439,9 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 							}
 
-						if(getMenu()->GuardarNombre.indice >= 5){
-							getMenu()->GuardarNombre.indice = 4;
+						if(getMenu()->GuardarNombre.indice > 5){
+							getMenu()->GuardarNombre.indice = 5;
+							getMenu()->GuardarNombre.nombre[5] = '\0';
 						}
 
 				}
@@ -442,6 +455,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 				//Se actualiza el cursor
 				SSD1306_DrawFilledCircle(getMenu()->GuardarNombre.posicion_x,  getMenu()->GuardarNombre.posicion_y, 5, 1);
 
+				//Se actualiza el nombre en el recuadro.
 				SSD1306_GotoXY(43, 5);
 				SSD1306_Puts(getMenu()->GuardarNombre.nombre, &Font_7x10, 1);
 
@@ -469,7 +483,6 @@ void menuGuardaNombre_Reset(){
 	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL;
 	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y3;
 	getMenu()->GuardarNombre.indice = 0;
-	strcpy(getMenu()->GuardarNombre.nombre,"     ");
 
 }
 

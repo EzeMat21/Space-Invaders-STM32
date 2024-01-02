@@ -24,7 +24,7 @@ typedef struct{
 	uint8_t posicion_x;
 	uint8_t posicion_y;
 	char nombre[6];
-	uint8_t indice;
+	int8_t indice;
 	TickType_t xLastWakeTime_x;
 	TickType_t xLastWakeTime_y;
 
