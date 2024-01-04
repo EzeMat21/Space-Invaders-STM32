@@ -8,3 +8,4 @@
 ../Core/Src/invaders.c:88:6:plotAliens	20
 ../Core/Src/invaders.c:182:6:disparoInit	1
 ../Core/Src/invaders.c:190:6:disparar	13
+../Core/Src/invaders.c:252:6:actualizarPantalla	1

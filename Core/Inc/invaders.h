@@ -112,4 +112,6 @@ disparo_t *getDisparo();
 void disparoInit();
 void disparar();
 
+void actualizarPantalla();
+
 #endif /* INC_INVADERS_H_ */

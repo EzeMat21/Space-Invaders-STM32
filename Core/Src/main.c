@@ -68,8 +68,8 @@ SPI_HandleTypeDef hspi1;
 osThreadId_t JoystickTaskHandle;
 const osThreadAttr_t JoystickTask_attributes = {
   .name = "JoystickTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for PantallaTask */
 osThreadId_t PantallaTaskHandle;
@@ -82,8 +82,15 @@ const osThreadAttr_t PantallaTask_attributes = {
 osThreadId_t MemoriaTaskHandle;
 const osThreadAttr_t MemoriaTask_attributes = {
   .name = "MemoriaTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
+/* Definitions for SonidoTask */
+osThreadId_t SonidoTaskHandle;
+const osThreadAttr_t SonidoTask_attributes = {
+  .name = "SonidoTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityAboveNormal1,
 };
 /* Definitions for queueJoystPant */
 osMessageQueueId_t queueJoystPantHandle;
@@ -97,6 +104,10 @@ const osMutexAttr_t mutexPuntajes_attributes = {
 };
 /* USER CODE BEGIN PV */
 
+//Notificacion entre MemoriaTask y PantallaTask
+osEventFlagsId_t notificationFlag;
+osEventFlagsId_t notificationFlag2;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,6 +120,7 @@ static void MX_ADC2_Init(void);
 void entryJoystick(void *argument);
 void entryPantalla(void *argument);
 void entryMemoria(void *argument);
+void entrySonido(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -192,12 +204,20 @@ int main(void)
   /* creation of MemoriaTask */
   MemoriaTaskHandle = osThreadNew(entryMemoria, NULL, &MemoriaTask_attributes);
 
+  /* creation of SonidoTask */
+  SonidoTaskHandle = osThreadNew(entrySonido, NULL, &SonidoTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
+
+  //Creacion de la cola notificacion.
+  notificationFlag = osEventFlagsNew(NULL);
+  notificationFlag2 = osEventFlagsNew(NULL);
+
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
@@ -574,11 +594,6 @@ void entryPantalla(void *argument)
   /* USER CODE BEGIN entryPantalla */
   /* Infinite loop */
 
-	//Inicializacion de la pantalla.
-	SSD1306_Init ();
-	SSD1306_Clear();
-	SSD1306_UpdateScreen();
-
 	//Se inicializan los botones (eje y, eje x del joystick y boton)
 	botones_t joystick;
 	menuInit();
@@ -599,12 +614,9 @@ void entryPantalla(void *argument)
 
 
 		menuActualizar(joystick.x_value, joystick.y_value, joystick.boton);
+		actualizarPantalla();
 
 	}
-
-
-    SSD1306_UpdateScreen(); // update screen
-    SSD1306_Fill(0);
 
   }
   /* USER CODE END entryPantalla */
@@ -621,8 +633,57 @@ void entryMemoria(void *argument)
 {
   /* USER CODE BEGIN entryMemoria */
 
+	uint8_t dataBuffer[TAMANO_PAGINA];
+	uint16_t address = MEMORIA_ADDRESS;
+
+	char buff[] = {'a','x','e','l','\0','\0','a','a'};
 
 	osMutexAcquire(mutexPuntajesHandle, osWaitForever);
+
+	address = MEMORIA_ADDRESS + 32;
+	//Write_Memoria(address, buff_nuevosPuntajes[32]);
+
+	uint8_t data[3];
+	data[0] = WRITE;
+	data[1] = address>>8;
+	data[2] = address;
+	//data[4] = value;
+
+	uint8_t wren = WREN;
+
+	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_RESET);  // pull the cs pin low
+	HAL_SPI_Transmit (&hspi1, &wren, 1, 100);  // write data to register
+
+	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_SET);  // pull the cs pin high
+	HAL_Delay(10);
+
+	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_RESET);  // pull the cs pin low
+
+	HAL_SPI_Transmit (&hspi1, data, 3, 100);  // write data to register
+
+
+
+	for(uint8_t i=0; i<8;i++){
+		//Write_Memoria(address, buff[i]);
+		//HAL_Delay(10);
+		HAL_SPI_Transmit (&hspi1, (uint8_t *)&buff[i], 1, HAL_MAX_DELAY);  // write data to register
+		//address++;
+
+	}
+
+
+	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_SET);  // pull the cs pin high
+
+	address = MEMORIA_ADDRESS;
+
+	for(uint8_t i=0; i<TAMANO_PAGINA;i++){
+
+		dataBuffer[i] = Read_memoria(address);
+		address++;
+	}
+
+
+	//EEPROM_ReadPage_DMA(MEMORIA_ADDRESS, dataBuffer);
 
 	//puntajesActualizar();
 	memoriaInit();
@@ -634,9 +695,51 @@ void entryMemoria(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+
+	  //Espero la notificacion 1 desde la tarea Pantalla/Menu (desde el menu de guardado de nombre) para sincronizar el ordenamiento y guardado
+	  //del nuevo puntaje.
+	  uint32_t flags = osEventFlagsWait(notificationFlag, NOTIFICATION_VALUE, osFlagsWaitAny, osWaitForever);
+
+	      // Realiza acciones basadas en la notificación recibida
+	      if (flags == NOTIFICATION_VALUE)
+	      {
+	    	  //Acceso al mutex, ya que se comparte el periférico SPI con la tarea SonidoTask.
+	    	  osMutexAcquire(mutexPuntajesHandle, osWaitForever);
+
+	    	  //Ordenamiento_Puntajes();
+	    	  writeNuevosPuntajes(1);
+	    	  //guardarNuevosPuntaje();
+
+	    	  osMutexRelease(mutexPuntajesHandle);
+
+
+	    	  //Envio la notificacion 2 para que la tarea PantallaTask pueda pasar del menu guardado_nombre al menu de puntajes una vez que los puntajes
+	    	  //ya se encuentran ordenadas y guardadas, ya que sin esta segunda sincronizacion, puede pasarse al menu puntajes sin que estos se encuentren
+	    	  //ordenados. El ordenado se realiza en esta tarea MemoriaTask ya que las escrituras de puntajes se realizan solo en esta tarea.
+	    	  osEventFlagsSet(notificationFlag2, NOTIFICATION_VALUE2);
+	      }
+
+    //osDelay(1);
   }
   /* USER CODE END entryMemoria */
+}
+
+/* USER CODE BEGIN Header_entrySonido */
+/**
+* @brief Function implementing the SonidoTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_entrySonido */
+void entrySonido(void *argument)
+{
+  /* USER CODE BEGIN entrySonido */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END entrySonido */
 }
 
 /**

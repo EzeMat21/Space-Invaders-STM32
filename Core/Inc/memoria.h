@@ -39,8 +39,10 @@ extern SPI_HandleTypeDef hspi1;
 
 #define PIN_CS GPIO_PIN_5
 #define MEMORIA_ADDRESS 0
+#define TAMANO_PAGINA 64
 
-#define MEMORIA_TAMANO_PUNTAJE 8	//6 bytes de nombre y 2 de puntaje
+#define MEMORIA_TAMANO_PUNTAJE 8	//6 bytes de nombre y 2 bytes de puntaje
+#define TAMANO_TOTAL_PUNTAJES 40
 
 
 puntajes_t *getPuntajes(uint8_t indice);
@@ -50,7 +52,10 @@ void memoriaInit();
 
 
 void Ordenamiento_Puntajes();
-void puntajesActualizar();
+void guardarNuevosPuntaje();
+void writeNuevosPuntajes(uint8_t cambios);
+//void EEPROM_ReadPage_DMA(uint16_t pageNumber, uint8_t *dataBuffer);
+
 
 
 #endif /* INC_MEMORIA_H_ */

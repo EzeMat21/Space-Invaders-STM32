@@ -8,8 +8,11 @@
 
 #include "menu.h"
 
-menu_t menu;
 
+extern osEventFlagsId_t notificationFlag;
+extern osEventFlagsId_t notificationFlag2;
+
+menu_t menu;
 
 menu_t *getMenu(){
 
@@ -19,13 +22,19 @@ menu_t *getMenu(){
 
 void menuInit(){
 
+	//Inicializacion de la pantalla.
+	SSD1306_Init ();
+	SSD1306_Clear();
+	SSD1306_UpdateScreen();
+
 	//Se inicializan las posiciones iniciales del player y de los aliens.
 	playerInit();
 	InvaderInit();
 	disparoInit();
 
 	//Se inicializa el cursor de la pantalla principal.
-	getMenu()->menuActual = guardar_nombre;
+	//getMenu()->menuActual = guardar_nombre;
+	getMenu()->menuActual = menu_principal;
 	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 
 
@@ -33,8 +42,6 @@ void menuInit(){
 	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
 	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
 	getMenu()->GuardarNombre.indice = 0;
-
-
 
 }
 
@@ -226,7 +233,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			Timenow = xTaskGetTickCount();
 
 			//Este if es para generar un retraso al mover el cursor en el eje x como en el ya que sino se mueve demasiado rapido.
-			if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_y) > pdMS_TO_TICKS(150)){
+			if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_y) > pdMS_TO_TICKS(150) && (y!=nulo)){
 
 				getMenu()->GuardarNombre.xLastWakeTime_y = xTaskGetTickCount();
 
@@ -304,7 +311,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			Timenow = xTaskGetTickCount();
 
 			//Este if es para generar un retraso al mover el cursor en el eje x como en el ya que sino se mueve demasiado rapido.
-		if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_x) > pdMS_TO_TICKS(100)){
+		if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_x) > pdMS_TO_TICKS(100) && (x!=nulo) ){
 
 			getMenu()->GuardarNombre.xLastWakeTime_x= xTaskGetTickCount();
 
@@ -364,6 +371,15 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 					break;
 				}
 
+		}
+
+
+			Timenow = xTaskGetTickCount();
+
+			//Este if es para generar un retraso al mover el cursor en el eje x como en el ya que sino se mueve demasiado rapido.
+		if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_boton) > pdMS_TO_TICKS(100) && (boton !=false) ){
+
+			getMenu()->GuardarNombre.xLastWakeTime_boton= xTaskGetTickCount();
 
 
 			//uint8_t indice_debug;
@@ -420,8 +436,21 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 										if((getMenu()->GuardarNombre.indice != 0 )){
 
+
+											//Guardo el nuevo nombre en la posicion 5 de getPuntajes()->nombre.
 											strcpy(getPuntajes(4)->nombre,getMenu()->GuardarNombre.nombre);
-											getMenu()->menuActual = puntajes;
+
+
+										    // Notifica a la tarea Task2 utilizando VTaskNotify
+										    osEventFlagsSet(notificationFlag, NOTIFICATION_VALUE);
+
+										    uint32_t flags = osEventFlagsWait(notificationFlag2, NOTIFICATION_VALUE2, osFlagsWaitAny, osWaitForever);
+
+										    if (flags == NOTIFICATION_VALUE2){
+										    	getMenu()->menuActual = puntajes;
+										    }
+
+
 
 										}
 									}
@@ -466,9 +495,16 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 //-------------------------------------------------------------- GAME OVER -----------------------------------------------------------------------------
 	case game_over:
 
-		SSD1306_GotoXY(35, 25);
-		SSD1306_Puts("GAME OVER", &Font_7x10, 1);
+		//SSD1306_GotoXY(35, 25);
+		//SSD1306_Puts("GAME OVER", &Font_7x10, 1);
 
+		SSD1306_DrawBitmap(15, 10, game_over_figura, 100, 40, 1);
+
+		if(y == arriba){
+
+			getMenu()->menuActual = guardar_nombre;
+
+		}
 
 		break;
 	default:

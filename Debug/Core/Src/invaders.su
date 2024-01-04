@@ -8,3 +8,4 @@
 ../Core/Src/invaders.c:88:6:plotAliens	32	static
 ../Core/Src/invaders.c:182:6:disparoInit	4	static
 ../Core/Src/invaders.c:190:6:disparar	40	static
+../Core/Src/invaders.c:252:6:actualizarPantalla	8	static

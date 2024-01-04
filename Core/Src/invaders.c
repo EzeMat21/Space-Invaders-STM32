@@ -249,7 +249,11 @@ void disparar(){
 
 
 
+void actualizarPantalla(){
 
+    SSD1306_UpdateScreen(); // update screen
+    SSD1306_Fill(0);
+}
 
 
 

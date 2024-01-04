@@ -7,6 +7,10 @@
 
 #include "memoria.h"
 
+
+
+extern SPI_HandleTypeDef hspi1;
+
 puntajes_t Puntajes[5];
 
 puntajes_t *getPuntajes(uint8_t indice){
@@ -30,7 +34,7 @@ void Write_Memoria(uint16_t address, uint8_t value){
 
 	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_SET);  // pull the cs pin high
 
-	HAL_Delay(1);
+	HAL_Delay(10);
 
 	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_RESET);  // pull the cs pin low
 	HAL_SPI_Transmit (&hspi1, data, 3, 100);  // write data to register
@@ -61,7 +65,7 @@ uint8_t Read_memoria(uint16_t address)
 void memoriaInit(){
 
 
-		puntajesActualizar();
+		//puntajesActualizar();
 
 		char buff_nombre[7];
 
@@ -72,7 +76,7 @@ void memoriaInit(){
 
 		uint8_t puntaje_lsb;
 		uint8_t puntaje_msb;
-		uint8_t byte_dumb;
+		//uint8_t byte_dumb;
 
 
 		buff_nombre[0]  = Read_memoria(address);
@@ -151,7 +155,7 @@ void memoriaInit(){
 				}
 
 				else{
-					byte_dumb = Read_memoria(address);
+					Read_memoria(address);
 					HAL_Delay(3);
 				}
 
@@ -167,40 +171,162 @@ void memoriaInit(){
 }
 
 
-void puntajesActualizar(){		//Actualizar los puntajes y guardarlos en memoria
+
+void writeNuevosPuntajes(uint8_t cambios){
 
 
-	uint16_t address = MEMORIA_ADDRESS+24;
+	char buff_nuevosPuntajes[TAMANO_TOTAL_PUNTAJES];
+
+	//Primero almaceno los datos en el 'buff_nuevosPuntaje' y luego escribo la memoria con este buffer.
+
+	uint8_t k=0;
+	uint16_t address;
+
+
+	for(uint8_t i=0;i<TAMANO_TOTAL_PUNTAJES;i++){
+
+		if(i>=0 && i<6){
+
+			buff_nuevosPuntajes[i] = getPuntajes(0)->nombre[k];
+			k++;
+		}
+		else if(i>=8 && i<14){
+
+			buff_nuevosPuntajes[i] = getPuntajes(1)->nombre[k];
+			k++;
+		}
+		else if(i>=16 && i<22){
+
+			buff_nuevosPuntajes[i] = getPuntajes(2)->nombre[k];
+			k++;
+		}
+		else if(i>=24 && i<30){
+
+			buff_nuevosPuntajes[i] = getPuntajes(3)->nombre[k];
+			k++;
+		}
+		else if(i>=32 && i<38){
+
+			buff_nuevosPuntajes[i] = getPuntajes(4)->nombre[k];
+			k++;
+		}
+
+
+
+
+		switch(i){
+
+
+		case 6:
+			buff_nuevosPuntajes[i] = getPuntajes(0)->puntaje >>8;
+			k = 0;
+			break;
+		case 7:
+			buff_nuevosPuntajes[i] = getPuntajes(0)->puntaje && 0xFF;
+			break;
+		case 14:
+			buff_nuevosPuntajes[i] = getPuntajes(1)->puntaje >>8;
+			k = 0;
+			break;
+		case 15:
+			buff_nuevosPuntajes[i] = getPuntajes(1)->puntaje && 0xFF;
+			break;
+		case 22:
+			buff_nuevosPuntajes[i] = getPuntajes(2)->puntaje >>8;
+			k = 0;
+			break;
+		case 23:
+			buff_nuevosPuntajes[i] = getPuntajes(2)->puntaje && 0xFF;
+			break;
+		case 30:
+			buff_nuevosPuntajes[i] = getPuntajes(3)->puntaje >>8;
+			k = 0;
+			break;
+		case 31:
+			buff_nuevosPuntajes[i] = getPuntajes(3)->puntaje && 0xFF;
+			break;
+		case 38:
+			buff_nuevosPuntajes[i] = getPuntajes(4)->puntaje >>8;
+			k = 0;
+			break;
+		case 39:
+			buff_nuevosPuntajes[i] = getPuntajes(4)->puntaje && 0xFF;
+			break;
+
+		}
+
+	}
+
+
+
+	//Ahora sí se realiza la escritura.
+	//La escritura se realizará siempre que se realice mas de un cambio en las posiciones de los puntajes.
+	//La reescritura de la posicion 5 (getPuntajes(4)) siempre se realizará.
+
+
+		if(cambios > 1){
+
+			address = MEMORIA_ADDRESS;
+
+			for(uint8_t i=0; i<TAMANO_TOTAL_PUNTAJES;i++){
+				Write_Memoria(address, buff_nuevosPuntajes[i]);
+				address++;
+			}
+
+
+		}
+		else{
+
+			address = MEMORIA_ADDRESS + 32;
+			Write_Memoria(address, buff_nuevosPuntajes[32]);
+
+			for(uint8_t i=32; i<TAMANO_TOTAL_PUNTAJES;i++){
+				Write_Memoria(address, buff_nuevosPuntajes[i]);
+				//HAL_Delay(10);
+				address++;
+
+			}
+
+		}
+
+}
+
+
+
+/*
+
+void guardarNuevosPuntaje(){
+
+	//Actualizar los puntajes y guardarlos en memoria
+	uint16_t address = MEMORIA_ADDRESS+32;
 
 	char buffer[6];
+	strcpy(buffer, getPuntajes(4)->nombre);
 
 
-	strcpy(buffer, "boris");
-
-
-	uint16_t puntaje1 = 121;
+	uint16_t puntaje1 = getPuntajes(4)->puntaje;
 
 	uint8_t i=0;
 
 	Write_Memoria(address, buffer[i]);
 
-	do{
+		do{
 
-		if(i== 6){
-			Write_Memoria(address, puntaje1>>8);
-		}
-		if(i==7){
-			Write_Memoria(address, puntaje1);
-		}
-		else{
-			Write_Memoria(address, buffer[i]);
-		}
+			if(i== 6){
+				Write_Memoria(address, puntaje1>>8);
+			}
+			if(i==7){
+				Write_Memoria(address, puntaje1);
+			}
+			else{
+				Write_Memoria(address, buffer[i]);
+			}
 
-		i++;
-		address++;
-		HAL_Delay(10);
+			i++;
+			address++;
+			HAL_Delay(10);
 
-	}while(i != 9);
+		}while(i != 9);
 
 }
 
@@ -249,7 +375,7 @@ void Ordenamiento_Puntajes(){
 
 
 
-	char buff_retorno[5][6];
+	//char buff_retorno[5][6];
 
 
 	for(uint8_t k=0;k<5;k++){
@@ -272,11 +398,10 @@ void Ordenamiento_Puntajes(){
 
 	}
 
-
 }
 
 
-
+ */
 
 
 
