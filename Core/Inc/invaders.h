@@ -14,6 +14,7 @@
 #include "menu.h"
 #include "figuras.h"
 
+
 //---------------------------------------------------------------Player-------------------------------------------------------
 
 typedef struct{
@@ -21,6 +22,7 @@ typedef struct{
 	uint8_t nombre;
 	uint8_t posicion_X;
 	uint16_t score;
+
 
 }player_t;
 
@@ -32,12 +34,24 @@ typedef struct{
 #define NUM_ALIEN_FILA 3
 #define ESPACIO_ALIENS 1
 
+#define TAMANO_ALIEN_TOP 8
+#define TAMANO_ALIEN_MIDDLE 11
+#define TAMANO_ALIEN_BOTTOM 12
+
 
 #define OFFSET_INICIO 10
 //#define TAMANO_ALIEN_CHICO 8
 #define TAMANO_ALIEN 8
 #define ESPACIO_ENTRE_COLUMNAS 5
 #define ESPACIO_ENTRE_FILAS 3
+
+
+//Puntajes por cada aline
+#define PUNTAJE_ALIEN_TOP 30
+#define PUNTAJE_ALIEN_MIDDLE 20
+#define PUNTAJE_ALIEN_BOTTOM 10
+
+
 
 typedef struct{
 
@@ -54,6 +68,8 @@ typedef struct{
 
 	uint8_t velocidad_horizontal;
 	uint8_t velocidad_bajada;
+	uint8_t velocidad_disparo_aliens;
+	uint8_t tiempo_entre_disparos;
 
 }dificultad_t;
 
@@ -71,6 +87,7 @@ typedef struct{
 	orientacion_t orientacion;
 	uint8_t conteo_horizontal;
 	uint8_t conteo_bajada;
+	uint8_t animacion;
 
 
 }movimiento_aliens_t;
@@ -79,8 +96,8 @@ typedef struct{
 //----------------------------------------------------------------------Disparo----------------------------------------------------------------------
 
 
-#define VELOCIDAD_DISPARO_PLAYER 6
-#define POSICION_INICIAL_DISPARO 60
+#define VELOCIDAD_DISPARO_PLAYER 4
+#define POSICION_INICIAL_DISPARO 50
 
 typedef struct{
 
@@ -95,6 +112,9 @@ typedef struct{
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+//Pantalla
+void actualizarPantalla();
 
 //Funciones Player
 player_t *getPlayer();
@@ -112,6 +132,9 @@ disparo_t *getDisparo();
 void disparoInit();
 void disparar();
 
-void actualizarPantalla();
+disparo_t *getDisparoAliens();
+void disparoAliens();
+
+dificultad_t *getDificultad();
 
 #endif /* INC_INVADERS_H_ */

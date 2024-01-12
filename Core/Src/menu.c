@@ -32,9 +32,15 @@ void menuInit(){
 	InvaderInit();
 	disparoInit();
 
+	//Se inicializan las dificultades
+	getDificultad()->velocidad_horizontal = 8;
+	getDificultad()->velocidad_bajada = 1;
+	getDificultad()->velocidad_disparo_aliens = 3;
+
+
 	//Se inicializa el cursor de la pantalla principal.
-	//getMenu()->menuActual = guardar_nombre;
-	getMenu()->menuActual = menu_principal;
+	getMenu()->menuActual =  juego;
+	//getMenu()->menuActual = menu_principal;
 	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 
 
@@ -95,19 +101,52 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		//Se grafican el player, aliens y disparo.
 		plotPlayer(x, getPlayer());
 		plotAliens();
+		disparoAliens();
 
 		disparar();
+
+		if( getDisparoAliens()->numero_disparos == 0){
+
+			getMenu()->menuActual = progresion_niveles;
+		}
 
 
 		//Prender led si se apretó el boton
 		if(boton == true){
 
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
-			//boton_apretado = 1;
 			getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
 		}
 		else{
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
+
+		}
+
+		break;
+
+//-------------------------------------------------------- PROGRESION DE NIVELES ----------------------------------------------------------------
+
+	case progresion_niveles:
+
+		SSD1306_GotoXY(15, 15);
+		SSD1306_Puts("PUNTAJE ACTUAL", &Font_7x10, 1);
+
+		//Incremento de la dificultad (Aumento de la velocidad de los aliens y la velocidad de disparo)
+		//...
+
+		//Se inicializan las dificultades
+		getDificultad()->velocidad_horizontal = 6;
+		getDificultad()->velocidad_bajada = 2;
+		getDificultad()->velocidad_disparo_aliens = 3;
+
+
+		//Se REinicializan las posiciones iniciales del player y de los aliens.
+		playerInit();
+		InvaderInit();
+		disparoInit();
+
+		if(y == arriba){
+
+			getMenu()->menuActual = juego;
+
 		}
 
 		break;

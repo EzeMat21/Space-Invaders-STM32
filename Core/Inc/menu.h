@@ -45,6 +45,7 @@ enum{
 
 	menu_principal,
 	juego,
+	progresion_niveles,
 	puntajes,
 	guardar_nombre,
 	game_over

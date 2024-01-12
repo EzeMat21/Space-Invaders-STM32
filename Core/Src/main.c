@@ -40,7 +40,6 @@ typedef struct{
 
 }botones_t;
 
-dificultad_t dificultad;
 char nombre[5][6];
 
 
@@ -64,6 +63,8 @@ I2C_HandleTypeDef hi2c1;
 
 SPI_HandleTypeDef hspi1;
 
+TIM_HandleTypeDef htim2;
+
 /* Definitions for JoystickTask */
 osThreadId_t JoystickTaskHandle;
 const osThreadAttr_t JoystickTask_attributes = {
@@ -75,7 +76,7 @@ const osThreadAttr_t JoystickTask_attributes = {
 osThreadId_t PantallaTaskHandle;
 const osThreadAttr_t PantallaTask_attributes = {
   .name = "PantallaTask",
-  .stack_size = 256 * 4,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for MemoriaTask */
@@ -102,6 +103,11 @@ osMutexId_t mutexPuntajesHandle;
 const osMutexAttr_t mutexPuntajes_attributes = {
   .name = "mutexPuntajes"
 };
+/* Definitions for mySem01 */
+osSemaphoreId_t mySem01Handle;
+const osSemaphoreAttr_t mySem01_attributes = {
+  .name = "mySem01"
+};
 /* USER CODE BEGIN PV */
 
 //Notificacion entre MemoriaTask y PantallaTask
@@ -117,6 +123,7 @@ static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_ADC2_Init(void);
+static void MX_TIM2_Init(void);
 void entryJoystick(void *argument);
 void entryPantalla(void *argument);
 void entryMemoria(void *argument);
@@ -164,6 +171,7 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI1_Init();
   MX_ADC2_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -177,6 +185,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* creation of mySem01 */
+  mySem01Handle = osSemaphoreNew(1, 1, &mySem01_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -316,7 +328,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -449,6 +461,51 @@ static void MX_SPI1_Init(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 72-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 125-1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -469,7 +526,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9|GPIO_PIN_10, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
@@ -487,8 +544,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA10 */
-  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  /*Configure GPIO pins : PA9 PA10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -598,10 +655,6 @@ void entryPantalla(void *argument)
 	botones_t joystick;
 	menuInit();
 
-
-	//Se inicializan las dificultades
-	dificultad.velocidad_horizontal = 1;
-	dificultad.velocidad_bajada = 1;
 
   for(;;)
   {
@@ -734,10 +787,15 @@ void entryMemoria(void *argument)
 void entrySonido(void *argument)
 {
   /* USER CODE BEGIN entrySonido */
+	TickType_t xLastWakeTime;
+	xLastWakeTime = xTaskGetTickCount();
+	HAL_TIM_Base_Start_IT(&htim2);
+
+
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(1));
   }
   /* USER CODE END entrySonido */
 }
@@ -759,6 +817,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+
+
+  if (htim->Instance == TIM2) {
+
+	  GPIOA->BSRR |= GPIO_BSRR_BS9_Msk;
+	  GPIOA->BSRR |= GPIO_BSRR_BR9_Msk;
+
+  }
 
   /* USER CODE END Callback 1 */
 }

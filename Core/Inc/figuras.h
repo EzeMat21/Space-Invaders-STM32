@@ -70,6 +70,41 @@ static const unsigned char InvaderTopGfx[]= {	//SSD1306_DrawBitmap(0,0,InvaderMi
 };
 
 
+static const unsigned char InvaderTopGfx2[]= {
+		0b00011000,
+		0b00111100,
+		0b01111110,
+		0b11011011,
+		0b11111111,
+		0b01011010,
+		0b10000001,
+		0b01000010
+};
+
+
+static const unsigned char InvaderMiddleGfx2[] = {
+		0b00100000,0b10000000,
+		0b00010001,0b00000000,
+		0b10111111,0b10100000,
+		0b11111111,0b11100000,
+		0b00111111,0b10000000,
+		0b00100000,0b10000000,
+		0b01000000,0b01000000
+};
+
+
+static const unsigned char InvaderBottomGfx2[] = {
+		0b00001111,0b00000000,
+		0b01111111,0b11100000,
+		0b11111111,0b11110000,
+		0b11100110,0b01110000,
+		0b11111111,0b11110000,
+		0b00111001,0b11000000,
+		0b01000110,0b00100000,
+		0b10000000,0b00010000
+};
+
+
 static const unsigned char nave[8] = {
   0b00011000,
   0b00011000,
@@ -92,6 +127,14 @@ static const unsigned char explosion[] ={
 		0b00000000,0b00000000
 };
 
+
+static const unsigned char AlienBombGfx[] = {
+  0b10000000,
+  0b01000000,
+  0b10000000,
+  0b01000000
+
+};
 
 
 /*

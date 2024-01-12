@@ -1,5 +1,5 @@
 ../Core/Src/memoria.c:16:13:getPuntajes	1
 ../Core/Src/memoria.c:22:6:Write_Memoria	1
 ../Core/Src/memoria.c:47:9:Read_memoria	1
-../Core/Src/memoria.c:65:6:memoriaInit	29
-../Core/Src/memoria.c:175:6:writeNuevosPuntajes	29
+../Core/Src/memoria.c:65:6:memoriaInit	20
+../Core/Src/memoria.c:175:6:writeNuevosPuntajes	20
