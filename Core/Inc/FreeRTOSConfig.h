@@ -67,6 +67,7 @@
 #define configUSE_MUTEXES                        1
 #define configQUEUE_REGISTRY_SIZE                8
 #define configUSE_RECURSIVE_MUTEXES              1
+#define configUSE_APPLICATION_TASK_TAG           1
 #define configUSE_COUNTING_SEMAPHORES            1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION  0
 
@@ -144,6 +145,14 @@ standard names. */
 
 /* USER CODE BEGIN Defines */
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
+
+/*
+void callback_in(int);
+void callback_out(int);
+#define traceTASK_SWITCHED_IN() callback_in((int)pxCurrentTCB->pxTaskTag)
+#define traceTASK_SWITCHED_OUT() callback_out((int)pxCurrentTCB->pxTaskTag)
+*/
+
 /* USER CODE END Defines */
 
 #endif /* FREERTOS_CONFIG_H */

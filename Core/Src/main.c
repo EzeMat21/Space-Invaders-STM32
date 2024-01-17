@@ -27,6 +27,8 @@
 #include "task.h"
 #include "memoria.h"
 
+#include "sonido.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,10 +50,64 @@ char nombre[5][6];
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+#define TAMANO 256
+#define TAMANO_ARCHIVO sizeof(audio_disparo)
+#define VECES_AUDIO_DISPARO ceil(TAMANO_ARCHIVO /TAMANO)
+
+volatile int8_t veces = VECES_AUDIO_DISPARO;
+
+volatile uint8_t cual_apunto;
+volatile uint16_t resto;
+
+uint8_t buffer_ping[TAMANO];
+uint8_t buffer_pong[TAMANO];
+
+volatile uint8_t *puntero_escritura;
+volatile uint8_t *puntero_lectura;
+volatile uint8_t *puntero_final_lectura;
+volatile uint8_t *puntero_final_escritura;
+uint8_t offset = 0;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+
+/*
+void callback_in(int tag){
+switch(tag){
+case 0:
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+break;
+case 1:
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+break;
+case 2:
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+break;
+case 3:
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_SET);
+break;
+}
+}
+void callback_out(int tag){
+switch(tag){
+case 0:
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+break;
+case 1:
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+break;
+case 2:
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+break;
+case 3:
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
+break;
+}
+}
+*/
+
 
 /* USER CODE END PM */
 
@@ -64,6 +120,7 @@ I2C_HandleTypeDef hi2c1;
 SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
 /* Definitions for JoystickTask */
 osThreadId_t JoystickTaskHandle;
@@ -91,7 +148,7 @@ osThreadId_t SonidoTaskHandle;
 const osThreadAttr_t SonidoTask_attributes = {
   .name = "SonidoTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal1,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for queueJoystPant */
 osMessageQueueId_t queueJoystPantHandle;
@@ -124,6 +181,7 @@ static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
 void entryJoystick(void *argument);
 void entryPantalla(void *argument);
 void entryMemoria(void *argument);
@@ -172,6 +230,7 @@ int main(void)
   MX_SPI1_Init();
   MX_ADC2_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -474,14 +533,15 @@ static void MX_TIM2_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
 
   /* USER CODE BEGIN TIM2_Init 1 */
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 72-1;
+  htim2.Init.Prescaler = 1-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 125-1;
+  htim2.Init.Period = 255-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -493,15 +553,73 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 72-1;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 125-1;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
 
 }
 
@@ -526,10 +644,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9|GPIO_PIN_10, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
@@ -544,25 +662,78 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA9 PA10 */
-  GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PB5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  /*Configure GPIO pins : PB14 PB15 PB5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PA8 PA9 PA10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+
+/*void vApplicationIdleHook( void ){
+
+	vTaskSetApplicationTaskTag( NULL, ( void * ) 3 );
+
+}*/
+
+void swapp(){
+
+
+	if(cual_apunto == 1){	//Escritura en el buffer PING y lectura en el PONG
+
+		puntero_escritura = buffer_ping;
+		puntero_lectura = buffer_pong;
+
+				if(veces == 1){
+
+					puntero_final_escritura = buffer_ping + resto;
+					puntero_final_lectura = buffer_pong + TAMANO;
+				}
+				else if(veces == 0){
+					puntero_final_lectura = buffer_pong + resto;
+				}
+				else if(veces > 1){
+					puntero_final_escritura = buffer_ping + TAMANO;
+					puntero_final_lectura = buffer_pong + TAMANO;
+				}
+
+		}
+
+	else{					//Escritura en el buffer PONG y lectura en el PING
+		puntero_lectura  = buffer_ping;
+		puntero_escritura = buffer_pong;
+
+
+				if(veces == 1){
+
+					puntero_final_escritura = buffer_pong + resto;
+					puntero_final_lectura = buffer_ping + TAMANO;
+				}
+				else if(veces == 0){
+					puntero_lectura = buffer_ping + resto;
+				}
+				else if(veces > 1){
+					puntero_final_escritura = buffer_pong + TAMANO;
+					puntero_final_lectura = buffer_ping + TAMANO;
+				}
+
+			}
+
+
+}
+
 
 /* USER CODE END 4 */
 
@@ -577,6 +748,8 @@ void entryJoystick(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
+
+	//vTaskSetApplicationTaskTag( NULL, ( void * ) 0 );
 
 	botones_t joystick;
 	uint16_t val_x, val_y;
@@ -599,7 +772,7 @@ void entryJoystick(void *argument)
 	  val_y = HAL_ADC_GetValue(&hadc2);
 	  HAL_ADC_Stop(&hadc2);
 
-	  if(val_x > 2000){
+	  if(val_x > 2200){
 		  joystick.x_value = derecha;
 	  }
 	  else if(val_x < 1600){
@@ -610,7 +783,7 @@ void entryJoystick(void *argument)
 	  }
 
 
-	  if(val_y > 2000){
+	  if(val_y > 2200){
 		  joystick.y_value = abajo;
 	  }
 	  else if(val_y < 1600){
@@ -651,6 +824,9 @@ void entryPantalla(void *argument)
   /* USER CODE BEGIN entryPantalla */
   /* Infinite loop */
 
+
+	//vTaskSetApplicationTaskTag( NULL, ( void * ) 1 );
+
 	//Se inicializan los botones (eje y, eje x del joystick y boton)
 	botones_t joystick;
 	menuInit();
@@ -685,6 +861,11 @@ void entryPantalla(void *argument)
 void entryMemoria(void *argument)
 {
   /* USER CODE BEGIN entryMemoria */
+
+	//vTaskSetApplicationTaskTag( NULL, ( void * ) 2 );
+
+
+//	HAL_TIM_Base_Start_IT(&htim3);
 
 	uint8_t dataBuffer[TAMANO_PAGINA];
 	uint16_t address = MEMORIA_ADDRESS;
@@ -787,15 +968,56 @@ void entryMemoria(void *argument)
 void entrySonido(void *argument)
 {
   /* USER CODE BEGIN entrySonido */
-	TickType_t xLastWakeTime;
-	xLastWakeTime = xTaskGetTickCount();
-	HAL_TIM_Base_Start_IT(&htim2);
+
+	cual_apunto = 1;
+	swapp();
+
+	resto = (TAMANO_ARCHIVO - veces*TAMANO);
+
+
+	/*
+	  //Voy llenando el buffer ping, el puntero apunta a este buffer.
+	  for(uint16_t i=0; i<TAMANO; i++){
+
+		  buffer_pong[i] = audio_disparo[i];
+
+	  }*/
 
 
   /* Infinite loop */
   for(;;)
   {
-		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(1));
+	  osSemaphoreAcquire(mySem01Handle, osWaitForever);
+
+	  //Esta parte corresponde sólo a la escritura de los buffers. La lectura de los buffers se realiza en la interrupcion por timer.
+
+				  if(veces > 1){
+
+					  for(uint16_t i=0; i<TAMANO; i++){
+
+
+						  *puntero_escritura = audio_disparo[i + offset*((uint16_t)TAMANO)];
+						  puntero_escritura++;
+
+					  }
+				  }
+				  else if(veces == 1){			//Se lee el resto
+
+					  for(uint16_t i=0; i<resto; i++){
+
+
+						  *puntero_escritura = audio_disparo[i + offset*((uint16_t)TAMANO)];
+						  puntero_escritura++;
+
+					  }
+
+
+				  }
+
+				  offset++;
+
+
+
   }
   /* USER CODE END entrySonido */
 }
@@ -819,10 +1041,32 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
 
 
-  if (htim->Instance == TIM2) {
+  if (htim->Instance == TIM3) {
 
-	  GPIOA->BSRR |= GPIO_BSRR_BS9_Msk;
-	  GPIOA->BSRR |= GPIO_BSRR_BR9_Msk;
+		TIM2->CCR1 = *puntero_lectura;
+		puntero_lectura++;
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
+
+
+		 if(puntero_lectura == puntero_final_lectura){
+
+				 cual_apunto = !cual_apunto;
+				 veces--;
+				 swapp();
+
+				 if(veces < 0 ){
+						HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+						HAL_TIM_Base_Stop_IT(&htim3);
+						offset = 0;
+						//veces = ceil(TAMANO_ARCHIVO /TAMANO);
+						cual_apunto = 1;
+						swapp();
+				 }
+
+				// Notificar a la tarea para sincronización con la interrupción
+				 osSemaphoreRelease (mySem01Handle);
+
+		 }
 
   }
 

@@ -25,6 +25,9 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2099:12:xTaskResumeAll	12
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1198:7:vTaskDelayUntil	10
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1282:7:vTaskDelay	4
+../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2757:7:vTaskSetApplicationTaskTag	2
+../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2784:21:xTaskGetApplicationTaskTag	2
+../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2815:13:xTaskCallApplicationTaskHook	3
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2845:6:vTaskSwitchContext	7
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1624:7:vTaskSuspend	9
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2904:6:vTaskPlaceOnEventList	2

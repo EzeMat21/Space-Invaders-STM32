@@ -15,6 +15,7 @@
 #include "figuras.h"
 
 
+
 //---------------------------------------------------------------Player-------------------------------------------------------
 
 typedef struct{
@@ -105,6 +106,7 @@ typedef struct{
 	int8_t posicion_y;
 	uint8_t disparo;
 	uint8_t numero_disparos;
+	//TickType_t xLastWakeTime;
 
 }disparo_t;
 

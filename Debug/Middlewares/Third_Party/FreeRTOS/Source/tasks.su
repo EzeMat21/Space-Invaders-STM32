@@ -25,6 +25,9 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2099:12:xTaskResumeAll	24	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1198:7:vTaskDelayUntil	16	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1282:7:vTaskDelay	8	static,ignoring_inline_asm
+../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2757:7:vTaskSetApplicationTaskTag	16	static
+../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2784:21:xTaskGetApplicationTaskTag	8	static
+../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2815:13:xTaskCallApplicationTaskHook	8	static
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2845:6:vTaskSwitchContext	0	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1624:7:vTaskSuspend	16	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2904:6:vTaskPlaceOnEventList	8	static,ignoring_inline_asm

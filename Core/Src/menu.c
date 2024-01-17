@@ -8,9 +8,15 @@
 
 #include "menu.h"
 
-
 extern osEventFlagsId_t notificationFlag;
 extern osEventFlagsId_t notificationFlag2;
+
+extern osSemaphoreId_t mySem01Handle;
+
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
+
+extern int8_t veces;
 
 menu_t menu;
 
@@ -39,7 +45,7 @@ void menuInit(){
 
 
 	//Se inicializa el cursor de la pantalla principal.
-	getMenu()->menuActual =  juego;
+	getMenu()->menuActual =  guardar_nombre;
 	//getMenu()->menuActual = menu_principal;
 	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 
@@ -114,7 +120,21 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		//Prender led si se apretó el boton
 		if(boton == true){
 
-			getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
+			//TickType_t xTimenow;
+			//xTimenow = xTaskGetTickCount();
+
+			//if(xTimenow - tiempo_boton_juego > pdMS_TO_TICKS(100)){
+
+				//tiempo_boton_juego = xTaskGetTickCount();
+				getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
+
+				if(getDisparo()->numero_disparos == 1){
+					  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+					  HAL_TIM_Base_Start_IT(&htim3);
+					  veces = 4;
+					  osSemaphoreRelease (mySem01Handle);
+				}
+			//}
 		}
 		else{
 
@@ -259,7 +279,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 				case abajo:
 					mov = abajo;
 					break;
-				case nulo:
+				default:
 					mov = x;
 					break;
 
@@ -487,6 +507,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 										    if (flags == NOTIFICATION_VALUE2){
 										    	getMenu()->menuActual = puntajes;
+
 										    }
 
 
