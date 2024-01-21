@@ -5,10 +5,10 @@
 ../Core/Src/invaders.c:46:12:getDisparoAliens	0	static
 ../Core/Src/invaders.c:50:15:getDificultad	0	static
 ../Core/Src/invaders.c:58:6:actualizarPantalla	8	static
-../Core/Src/invaders.c:66:6:playerInit	0	static
-../Core/Src/invaders.c:72:6:plotPlayer	16	static
-../Core/Src/invaders.c:99:6:InvaderInit	8	static
-../Core/Src/invaders.c:114:6:plotAliens	48	static
-../Core/Src/invaders.c:237:6:disparoInit	0	static
-../Core/Src/invaders.c:251:6:disparar	48	static
-../Core/Src/invaders.c:331:6:disparoAliens	32	static
+../Core/Src/invaders.c:65:6:playerInit	0	static
+../Core/Src/invaders.c:71:6:plotPlayer	16	static
+../Core/Src/invaders.c:108:6:InvaderInit	8	static
+../Core/Src/invaders.c:123:6:plotAliens	48	static
+../Core/Src/invaders.c:246:6:disparoInit	0	static
+../Core/Src/invaders.c:259:6:disparar	48	static
+../Core/Src/invaders.c:339:6:disparoAliens	32	static

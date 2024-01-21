@@ -62,43 +62,52 @@ void actualizarPantalla(){
 }
 
 
-
 void playerInit(){
 
-	Player.posicion_X = 64;
-
+	getPlayer()->posicion_X = 64;
+	getPlayer()->vivo = true;
 }
 
 void plotPlayer(uint8_t direccion, player_t *player){
 
-	if(direccion == derecha){
+	if(getPlayer()->vivo == true){
 
-		if(player->posicion_X >= 120){
-			player->posicion_X = 120;
+		if(direccion == derecha){
+
+			if(player->posicion_X >= 120){
+				player->posicion_X = 120;
+			}
+			else{
+				player->posicion_X = player->posicion_X + 4;
+			}
+
 		}
-		else{
-			player->posicion_X = player->posicion_X + 4;
+		else if(direccion == izquierda){
+
+			if(player->posicion_X <= 0){
+				player->posicion_X = 0;
+			}
+			else{
+				player->posicion_X = player->posicion_X - 4;
+			}
 		}
 
+		SSD1306_DrawBitmap(player->posicion_X, 56, nave, 8,8,1);
 	}
-	else if(direccion == izquierda){
 
-		if(player->posicion_X <= 0){
-			player->posicion_X = 0;
-		}
-		else{
-			player->posicion_X = player->posicion_X - 4;
-		}
+	else{	//Si el jugador ha sido eliminado.
+
+		SSD1306_DrawBitmap(player->posicion_X, 56, nave_explotada, 8,8,1);
 	}
 
-	SSD1306_DrawBitmap(player->posicion_X, 56, nave, 8,8,1);
+
 }
 
 
 
 void InvaderInit(){
 
-	movimiento_Aliens.orientacion = mov_derecha;
+	getMovAliens()->orientacion = mov_derecha;
 
 	for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 		for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
@@ -236,12 +245,11 @@ void plotAliens(){
 
 void disparoInit(){
 
-
 	//Inicializacion del disparo del Player
-	Disparo.posicion_x = 0;
-	Disparo.posicion_y = POSICION_INICIAL_DISPARO;
-	Disparo.disparo = false;
-
+	getDisparo()->posicion_x = 0;
+	getDisparo()->posicion_y = POSICION_INICIAL_DISPARO;
+	getDisparo()->disparo = false;
+	getDisparo()->numero_disparos = 0;
 
 	//Inicializacion del Disparo de los Aliens
 	getDisparoAliens()->numero_disparos = 21;
@@ -251,7 +259,7 @@ void disparoInit(){
 void disparar(){
 
 
-			if(getDisparo()->numero_disparos == 1){
+			if(getDisparo()->numero_disparos == 1 && getPlayer()->vivo == true ){
 				getDisparo()->disparo = true;
 				getDisparo()->posicion_x = getPlayer()->posicion_X;
 			}
@@ -331,13 +339,19 @@ void disparar(){
 void disparoAliens(){
 
 
-	if(getDisparoAliens()->numero_disparos != 0){
+	if(getDisparoAliens()->numero_disparos != 0){	//Si no hay aliens vivos.
 
 				if(getDisparoAliens()->disparo == true){
 
 					getDisparoAliens()->posicion_y = getDisparoAliens()->posicion_y + dificultad.velocidad_disparo_aliens;
 
-					if(getDisparoAliens()->posicion_y >= 60){
+
+					if( (getDisparoAliens()->posicion_x + 1 >= getPlayer()->posicion_X) &  (getDisparoAliens()->posicion_x + 1 <= getPlayer()->posicion_X + 6) ){
+						getDisparoAliens()->disparo = false;
+						getPlayer()->vivo = false;
+					}
+
+					else if(getDisparoAliens()->posicion_y >= 60){
 						getDisparoAliens()->disparo = false;
 					}
 

@@ -30,14 +30,18 @@ extern osMutexId_t mutexPuntajesHandle;
 extern SPI_HandleTypeDef hspi1;
 
 //opcodes
-#define WREN  6
-#define WRDI  4
-#define RDSR  5
-#define WRSR  1
-#define READ  3
-#define WRITE 2
+#define READ 	0b110
+#define WRITE 	0b101
+#define WEN 	0b10011000000000
+#define WDS 	0b10000000000000
+#define ERASE 	0b111
+#define ERAL 	0b100
+#define WRAL 	0b100
 
-#define PIN_CS GPIO_PIN_5
+
+#define CHIP_SELECT_PIN GPIO_PIN_5
+#define CHIP_SELECT_PORT GPIOB
+
 #define MEMORIA_ADDRESS 0
 #define TAMANO_PAGINA 64
 
@@ -46,16 +50,16 @@ extern SPI_HandleTypeDef hspi1;
 
 
 puntajes_t *getPuntajes(uint8_t indice);
-void Write_Memoria(uint16_t address, uint8_t value);
+void Write_Enable();
+void Write_Memoria(uint16_t address, uint8_t dato);
 uint8_t Read_memoria(uint16_t address);
+void Read_all(uint16_t address, uint16_t tamano, uint8_t *buffer);
 void memoriaInit();
 
 
 void Ordenamiento_Puntajes();
 void guardarNuevosPuntaje();
 void writeNuevosPuntajes(uint8_t cambios);
-//void EEPROM_ReadPage_DMA(uint16_t pageNumber, uint8_t *dataBuffer);
-
 
 
 #endif /* INC_MEMORIA_H_ */

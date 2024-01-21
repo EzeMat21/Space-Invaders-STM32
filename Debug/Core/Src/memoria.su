@@ -1,5 +1,8 @@
 ../Core/Src/memoria.c:16:13:getPuntajes	0	static
-../Core/Src/memoria.c:22:6:Write_Memoria	32	static
-../Core/Src/memoria.c:47:9:Read_memoria	24	static
-../Core/Src/memoria.c:65:6:memoriaInit	56	static
-../Core/Src/memoria.c:175:6:writeNuevosPuntajes	96	static
+../Core/Src/memoria.c:23:6:Write_Enable	24	static
+../Core/Src/memoria.c:37:6:Write_Memoria	24	static
+../Core/Src/memoria.c:48:9:Read_memoria	24	static
+../Core/Src/memoria.c:66:6:Read_all	32	static
+../Core/Src/memoria.c:98:6:memoriaInit	88	static
+../Core/Src/memoria.c:193:6:writeNuevosPuntajes	96	static
+../Core/Src/memoria.c:359:6:Ordenamiento_Puntajes	96	static

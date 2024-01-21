@@ -19,45 +19,78 @@ puntajes_t *getPuntajes(uint8_t indice){
 	return &Puntajes[indice];
 }
 
-void Write_Memoria(uint16_t address, uint8_t value){
 
-	uint8_t data[3];
-	data[0] = WRITE;
-	data[1] = address>>8;
-	data[2] = address;
-	//data[4] = value;
+void Write_Enable(){
 
-	uint8_t wren = WREN;
 
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_RESET);  // pull the cs pin low
-	HAL_SPI_Transmit (&hspi1, &wren, 1, 100);  // write data to register
+	HAL_GPIO_WritePin(CHIP_SELECT_PORT, CHIP_SELECT_PIN, GPIO_PIN_SET);
 
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_SET);  // pull the cs pin high
+	uint8_t comando[2] = { 0x27 , 0xFF};
+	HAL_SPI_Transmit(&hspi1, &comando[0], 1, HAL_MAX_DELAY);
+	HAL_SPI_Transmit(&hspi1, &comando[1], 1, HAL_MAX_DELAY);
 
-	HAL_Delay(10);
+	HAL_GPIO_WritePin(CHIP_SELECT_PORT, CHIP_SELECT_PIN, GPIO_PIN_RESET);
 
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_RESET);  // pull the cs pin low
-	HAL_SPI_Transmit (&hspi1, data, 3, 100);  // write data to register
-	HAL_SPI_Transmit (&hspi1, &value, 1, 100);  // write data to register
 
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_SET);  // pull the cs pin high
+}
+
+void Write_Memoria(uint16_t address, uint8_t dato){
+
+	HAL_GPIO_WritePin(CHIP_SELECT_PORT, CHIP_SELECT_PIN, GPIO_PIN_SET);
+
+	uint8_t comando[3] = { ((uint8_t)WRITE<<3) + (address>>8  & 0xFF), address & 0xFF, dato};
+	HAL_SPI_Transmit(&hspi1, comando, 3, HAL_MAX_DELAY);
+
+	HAL_GPIO_WritePin(CHIP_SELECT_PORT, CHIP_SELECT_PIN, GPIO_PIN_RESET);
 }
 
 
 uint8_t Read_memoria(uint16_t address)
 {
-	uint8_t data_rec;
-	uint8_t data[3];
-	data[0] = READ;
-	data[1] = address>>8;
-	data[2] = address;
+	uint8_t dato_leido[2];
 
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_RESET);  // pull the pin low
-	HAL_SPI_Transmit (&hspi1, data, 3, 100);  // send address
-	HAL_SPI_Receive (&hspi1, &data_rec, 1, 100);  // receive 6 bytes data
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_SET);  // pull the pin high
+	HAL_GPIO_WritePin(CHIP_SELECT_PORT, CHIP_SELECT_PIN, GPIO_PIN_SET);
 
-	return data_rec;
+	uint8_t comando[2] = { ((uint16_t)READ<<3) + (address>>8 & 0xFF), address & 0xFF};
+	HAL_SPI_Transmit(&hspi1, comando, 2, 100);
+
+	HAL_SPI_Receive(&hspi1, &dato_leido[0], 1, HAL_MAX_DELAY);
+	HAL_SPI_Receive(&hspi1, &dato_leido[1], 2, HAL_MAX_DELAY);
+
+	HAL_GPIO_WritePin(CHIP_SELECT_PORT, CHIP_SELECT_PIN, GPIO_PIN_RESET);
+
+
+	return ((dato_leido[0]<<1) + (dato_leido[1]>>7));
+}
+
+void Read_all(uint16_t address, uint16_t tamano, uint8_t *buffer){
+
+
+	uint8_t dato_actual, dato_anterior;
+
+
+	HAL_GPIO_WritePin(CHIP_SELECT_PORT, CHIP_SELECT_PIN, GPIO_PIN_SET);
+
+	uint8_t comando[2] = { ((uint16_t)READ<<3) + (address>>8 & 0xFF), address & 0xFF};
+	HAL_SPI_Transmit(&hspi1, comando, 2, 100);
+
+	//HAL_Delay(10);
+
+	HAL_SPI_Receive(&hspi1, &dato_anterior, 1, HAL_MAX_DELAY);
+
+
+	for(uint16_t i=0; i< tamano; i++){
+
+		HAL_SPI_Receive(&hspi1, &dato_actual, 1, HAL_MAX_DELAY);
+		*buffer = (dato_anterior<<1) + (dato_actual>>7);
+		buffer++;
+		dato_anterior = dato_actual;
+
+	}
+
+
+	HAL_GPIO_WritePin(CHIP_SELECT_PORT, CHIP_SELECT_PIN, GPIO_PIN_RESET);
+
 }
 
 
@@ -65,9 +98,8 @@ uint8_t Read_memoria(uint16_t address)
 void memoriaInit(){
 
 
-		//puntajesActualizar();
-
 		char buff_nombre[7];
+		strcpy(buff_nombre, "      ");
 
 		uint16_t address = MEMORIA_ADDRESS;
 		uint8_t j = 0;
@@ -76,25 +108,21 @@ void memoriaInit(){
 
 		uint8_t puntaje_lsb;
 		uint8_t puntaje_msb;
-		//uint8_t byte_dumb;
+
+		uint8_t buffer[TAMANO_TOTAL_PUNTAJES];
 
 
-		buff_nombre[0]  = Read_memoria(address);
-		HAL_Delay(3);
-
-		strcpy(buff_nombre, "      ");
+		Read_all(address, TAMANO_TOTAL_PUNTAJES, buffer);
 
 		do{
 
 			if( (i==6) || (i==14) || (i==22) || (i==30) || (i==38) ){
 
-				puntaje_msb = Read_memoria(address);
-				HAL_Delay(3);
+				puntaje_msb = buffer[i];
 			}
 			else if((i==7) || (i==15) || (i==23) || (i==31) || (i==39)){
 
-				puntaje_lsb = Read_memoria(address);
-				HAL_Delay(3);
+				puntaje_lsb = buffer[i];
 
 				switch(i){
 
@@ -124,8 +152,7 @@ void memoriaInit(){
 			else{
 
 				if( (buff_nombre[j] != '\0') && permiso==true){
-					buff_nombre[j]  = Read_memoria(address);
-					HAL_Delay(3);
+					buff_nombre[j]  = buffer[i];;
 
 					if(buff_nombre[j] == '\0'){
 
@@ -153,19 +180,10 @@ void memoriaInit(){
 						j++;
 					}
 				}
-
-				else{
-					Read_memoria(address);
-					HAL_Delay(3);
-				}
-
 			}
 			i++;
-			address++;
-			//HAL_Delay(3);
 
 		}while(i != 40);
-
 
 
 }
@@ -264,12 +282,17 @@ void writeNuevosPuntajes(uint8_t cambios){
 	//La reescritura de la posicion 5 (getPuntajes(4)) siempre se realizará.
 
 
+	Write_Enable();
+	HAL_Delay(10);
+
+
 		if(cambios > 1){
 
 			address = MEMORIA_ADDRESS;
 
 			for(uint8_t i=0; i<TAMANO_TOTAL_PUNTAJES;i++){
 				Write_Memoria(address, buff_nuevosPuntajes[i]);
+				HAL_Delay(10);
 				address++;
 			}
 
@@ -282,7 +305,7 @@ void writeNuevosPuntajes(uint8_t cambios){
 
 			for(uint8_t i=32; i<TAMANO_TOTAL_PUNTAJES;i++){
 				Write_Memoria(address, buff_nuevosPuntajes[i]);
-				//HAL_Delay(10);
+				HAL_Delay(10);
 				address++;
 
 			}
@@ -328,7 +351,7 @@ void guardarNuevosPuntaje(){
 
 		}while(i != 9);
 
-}
+}*/
 
 
 //Hay que corregir el ordenamiento de puntajes.
@@ -374,34 +397,46 @@ void Ordenamiento_Puntajes(){
 
 
 
-
-	//char buff_retorno[5][6];
+	uint8_t finalizado;
+	char buff_aux[6];
 
 
 	for(uint8_t k=0;k<5;k++){
 
-		uint8_t j=0;
-		do{
+		finalizado = true;
 
-			if(getPuntajes(j)->puntaje == vector[k]){
+			uint8_t j=0;
+			do{
 
-				//strcpy(buff_retorno[j], buff_nombre[k]);
-				strcpy(getPuntajes(k)->nombre, getPuntajes(j)->nombre);
-				strcpy(getPuntajes(j)->nombre, buff_nombre[k]);
+				if(getPuntajes(j)->puntaje == vector[k]){
 
-				getPuntajes(j)->puntaje = getPuntajes(k)->puntaje;
-				getPuntajes(k)->puntaje = vector[k];
-			}
-			j++;
+					strcpy(buff_aux, getPuntajes(k)->nombre);
+					strcpy(getPuntajes(k)->nombre, getPuntajes(j)->nombre);
+					strcpy(getPuntajes(j)->nombre, buff_aux);
 
-		}while(j!=k);
+					//strcpy(buff_retorno[j], buff_nombre[k]);
+					//strcpy(getPuntajes(k)->nombre, getPuntajes(j)->nombre);
+					//strcpy(getPuntajes(j)->nombre, buff_nombre[k]);
 
+					//getPuntajes(j)->puntaje = getPuntajes(k)->puntaje;
+					//getPuntajes(k)->puntaje = vector[k];
+
+					getPuntajes(j)->puntaje = getPuntajes(k)->puntaje;
+					getPuntajes(k)->puntaje = vector[k];
+					finalizado = false;
+				}
+				j++;
+
+			}while(finalizado);
 	}
+
+
+
 
 }
 
 
- */
+
 
 
 

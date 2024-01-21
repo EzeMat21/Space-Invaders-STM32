@@ -73,6 +73,8 @@ uint8_t offset = 0;
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+
+//------------------------------TRACE HOOKS------------------------------------------------------------------------------------------
 /*
 void callback_in(int tag){
 switch(tag){
@@ -109,6 +111,8 @@ break;
 */
 
 
+uint8_t retorno[10];
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -133,7 +137,7 @@ const osThreadAttr_t JoystickTask_attributes = {
 osThreadId_t PantallaTaskHandle;
 const osThreadAttr_t PantallaTask_attributes = {
   .name = "PantallaTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for MemoriaTask */
@@ -504,7 +508,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -864,67 +868,35 @@ void entryMemoria(void *argument)
 
 	//vTaskSetApplicationTaskTag( NULL, ( void * ) 2 );
 
-
-//	HAL_TIM_Base_Start_IT(&htim3);
-
-	uint8_t dataBuffer[TAMANO_PAGINA];
-	uint16_t address = MEMORIA_ADDRESS;
-
-	char buff[] = {'a','x','e','l','\0','\0','a','a'};
-
 	osMutexAcquire(mutexPuntajesHandle, osWaitForever);
 
-	address = MEMORIA_ADDRESS + 32;
-	//Write_Memoria(address, buff_nuevosPuntajes[32]);
 
-	uint8_t data[3];
-	data[0] = WRITE;
-	data[1] = address>>8;
-	data[2] = address;
-	//data[4] = value;
+	uint8_t buffer[6];
 
-	uint8_t wren = WREN;
+	uint16_t address = MEMORIA_ADDRESS;
 
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_RESET);  // pull the cs pin low
-	HAL_SPI_Transmit (&hspi1, &wren, 1, 100);  // write data to register
+	strcpy(buffer, "lindo");
+	uint16_t puntaje = 2450;
 
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_SET);  // pull the cs pin high
+	Write_Enable();
 	HAL_Delay(10);
 
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_RESET);  // pull the cs pin low
+	for(uint8_t i=0;i<6;i++){
 
-	HAL_SPI_Transmit (&hspi1, data, 3, 100);  // write data to register
-
-
-
-	for(uint8_t i=0; i<8;i++){
-		//Write_Memoria(address, buff[i]);
-		//HAL_Delay(10);
-		HAL_SPI_Transmit (&hspi1, (uint8_t *)&buff[i], 1, HAL_MAX_DELAY);  // write data to register
-		//address++;
-
-	}
-
-
-	HAL_GPIO_WritePin (GPIOB, PIN_CS, GPIO_PIN_SET);  // pull the cs pin high
-
-	address = MEMORIA_ADDRESS;
-
-	for(uint8_t i=0; i<TAMANO_PAGINA;i++){
-
-		dataBuffer[i] = Read_memoria(address);
+		Write_Memoria(address, buffer[i]);
 		address++;
+		HAL_Delay(10);
 	}
 
+	Write_Memoria(address, puntaje>>8);
+	HAL_Delay(10);
+	address++;
+	Write_Memoria(address, puntaje);
 
-	//EEPROM_ReadPage_DMA(MEMORIA_ADDRESS, dataBuffer);
-
-	//puntajesActualizar();
 	memoriaInit();
-	//Ordenamiento_Puntajes();
+	Ordenamiento_Puntajes();
 
 	osMutexRelease(mutexPuntajesHandle);
-
 
   /* Infinite loop */
   for(;;)
@@ -941,7 +913,7 @@ void entryMemoria(void *argument)
 	    	  osMutexAcquire(mutexPuntajesHandle, osWaitForever);
 
 	    	  //Ordenamiento_Puntajes();
-	    	  writeNuevosPuntajes(1);
+	    	  //writeNuevosPuntajes(1);
 	    	  //guardarNuevosPuntaje();
 
 	    	  osMutexRelease(mutexPuntajesHandle);

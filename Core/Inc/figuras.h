@@ -116,6 +116,20 @@ static const unsigned char nave[8] = {
   0b00100100
 };
 
+
+static const unsigned char nave_explotada[8] = {
+
+		0b10000001,
+		0b00001000,
+		0b01001000,
+		0b00001010,
+		0b00101110,
+		0b10011111,
+		0b01100110,
+		0b00100100
+
+};
+
 static const unsigned char explosion[] ={
 		0b10010001,0b00100000,
 		0b01001010,0b01000000,
@@ -136,12 +150,16 @@ static const unsigned char AlienBombGfx[] = {
 
 };
 
-
-/*
-static const unsigned char pato[]={
-		14, 11, 14, 60, 252, 124, 28, 8
-};*/
-
+static const unsigned char BaseGfx [] = {
+		0b00011111,0b11111000,
+		0b01111111,0b11111110,
+		0b11111111,0b11111111,
+		0b11111111,0b11111111,
+		0b11111111,0b11111111,
+		0b11111000,0b00011111,
+		0b11100000,0b00000111,
+		0b11100000,0b00000111
+};
 
 static const unsigned char game_over_figura[] = {
 

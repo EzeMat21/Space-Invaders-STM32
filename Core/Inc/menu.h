@@ -14,6 +14,7 @@
 #include "memoria.h"
 
 #include "task.h"
+#include "tonos.h"
 
 #define true 1
 #define false 0
@@ -33,9 +34,19 @@ typedef struct{
 
 typedef struct{
 
+	TickType_t retrasoJuego_GameOver;
+	uint8_t flag;
+
+}menuJuego_t;
+
+typedef struct{
+
 	uint8_t menuActual;
 	uint8_t posicion_MenuPrincipal;
 	cursor_t GuardarNombre;
+	menuJuego_t juego;
+
+	uint8_t musica_gameover;
 
 
 }menu_t;
@@ -89,9 +100,12 @@ enum{
 #define NOTIFICATION_VALUE 1
 #define NOTIFICATION_VALUE2 2
 
+
 //Funciones
 menu_t *getMenu();
 void menuInit();
+void menuReset();
+void GuardarNombreReset();
 void menuActualizar(uint8_t x, uint8_t y, uint8_t boton);
 
 

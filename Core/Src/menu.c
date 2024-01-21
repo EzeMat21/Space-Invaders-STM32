@@ -45,8 +45,9 @@ void menuInit(){
 
 
 	//Se inicializa el cursor de la pantalla principal.
-	getMenu()->menuActual =  guardar_nombre;
+	//getMenu()->menuActual =  guardar_nombre;
 	//getMenu()->menuActual = menu_principal;
+	getMenu()->menuActual = juego;
 	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 
 
@@ -54,6 +55,12 @@ void menuInit(){
 	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
 	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
 	getMenu()->GuardarNombre.indice = 0;
+
+
+
+	//Para las variables de juego
+	getMenu()->juego.flag = 0;
+
 
 }
 
@@ -89,7 +96,9 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 				getMenu()->menuActual = juego;
 			}
 			else if(getMenu()->posicion_MenuPrincipal == POSICION_CURSOR_PUNTAJES){
-				getMenu()->menuActual = puntajes;
+
+			    getMenu()->menuActual = puntajes;
+
 			}
 			break;
 		case false:
@@ -109,23 +118,37 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		plotAliens();
 		disparoAliens();
 
-		disparar();
-
 		if( getDisparoAliens()->numero_disparos == 0){
 
 			getMenu()->menuActual = progresion_niveles;
 		}
 
 
+		TickType_t Tiempo_Actual = xTaskGetTickCount();
+
+		if(getMenu()->juego.flag == 0){
+
+			if(getPlayer()->vivo == false){
+
+				getMenu()->juego.retrasoJuego_GameOver = xTaskGetTickCount();
+				getMenu()->juego.flag = 1;
+			}
+			else{
+				getMenu()->juego.retrasoJuego_GameOver = Tiempo_Actual;
+
+			}
+
+		}
+
+		//Retraso de unos segundos antes de pasar a la pantalla de game over.
+		if(Tiempo_Actual - getMenu()->juego.retrasoJuego_GameOver > pdMS_TO_TICKS(2000)){
+			getMenu()->menuActual = game_over;
+		}
+
+
 		//Prender led si se apretó el boton
 		if(boton == true){
 
-			//TickType_t xTimenow;
-			//xTimenow = xTaskGetTickCount();
-
-			//if(xTimenow - tiempo_boton_juego > pdMS_TO_TICKS(100)){
-
-				//tiempo_boton_juego = xTaskGetTickCount();
 				getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
 
 				if(getDisparo()->numero_disparos == 1){
@@ -134,11 +157,12 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 					  veces = 4;
 					  osSemaphoreRelease (mySem01Handle);
 				}
-			//}
-		}
-		else{
 
 		}
+
+
+		disparar();
+
 
 		break;
 
@@ -189,6 +213,8 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 		//Nombres
 
+		osMutexAcquire(mutexPuntajesHandle, osWaitForever);
+
 		for(uint8_t j=0; j<5;j++){
 
 			posicion = j*10 + 13;
@@ -208,6 +234,9 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			itoa(getPuntajes(j)->puntaje,(char*)buffer,10);
 			SSD1306_Puts((char *)buffer, &Font_7x10, 1);
 		}
+
+
+		osMutexRelease(mutexPuntajesHandle);
 
 
 		switch(y){
@@ -506,6 +535,12 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 										    uint32_t flags = osEventFlagsWait(notificationFlag2, NOTIFICATION_VALUE2, osFlagsWaitAny, osWaitForever);
 
 										    if (flags == NOTIFICATION_VALUE2){
+
+									//Se reinician los valores de todos los menues
+									//(se reinician las posiciones del player, flags en el juego - las posiciones de los cursores, etc.
+										    	menuReset();
+
+
 										    	getMenu()->menuActual = puntajes;
 
 										    }
@@ -560,8 +595,34 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 		SSD1306_DrawBitmap(15, 10, game_over_figura, 100, 40, 1);
 
+		if(getMenu()->musica_gameover == true){
+
+
+			  // Play a Wah-Wah-Wah-Wah sound
+			  tone(SPEAKER_PIN, NOTE_DS5);
+			  HAL_Delay(300);
+			  tone(SPEAKER_PIN, NOTE_D5);
+			  HAL_Delay(300);
+			  tone(SPEAKER_PIN, NOTE_CS5);
+			  HAL_Delay(300);
+			  for (byte i = 0; i < 10; i++) {
+			    for (int pitch = -10; pitch <= 10; pitch++) {
+			      tone(SPEAKER_PIN, NOTE_C5 + pitch);
+			      delay(5);
+			    }
+			  }
+			  noTone(SPEAKER_PIN);
+			  HAL_Delay(500);
+
+
+
+			getMenu()->musica_gameover = false;
+		}
+
+
 		if(y == arriba){
 
+			GuardarNombreReset();
 			getMenu()->menuActual = guardar_nombre;
 
 		}
@@ -574,11 +635,35 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 }
 
 
-void menuGuardaNombre_Reset(){
+void menuReset(){
 
-	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL;
-	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y3;
+	//Se inicializan las posiciones iniciales del player y de los aliens.
+	playerInit();
+	InvaderInit();
+	disparoInit();
+
+	//Se reinician las dificultades al nivel 1
+	getDificultad()->velocidad_horizontal = 8;
+	getDificultad()->velocidad_bajada = 1;
+	getDificultad()->velocidad_disparo_aliens = 3;
+
+
+	//Para las variables de juego
+	getMenu()->juego.flag = 0;
+
+	//Se inicializa el cursor de la pantalla principal.
+	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
+
+}
+
+
+void GuardarNombreReset(){
+
+	//Se inicializa el cursor de la pantalla Guardado de nombre
+	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
 	getMenu()->GuardarNombre.indice = 0;
+	strcpy(getMenu()->GuardarNombre.nombre,"     ");
 
 }
 
