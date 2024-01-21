@@ -28,6 +28,8 @@
 #include "memoria.h"
 
 #include "sonido.h"
+#include "tonos.h"
+
 
 /* USER CODE END Includes */
 
@@ -50,68 +52,35 @@ char nombre[5][6];
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define TAMANO 256
-#define TAMANO_ARCHIVO sizeof(audio_disparo)
-#define VECES_AUDIO_DISPARO ceil(TAMANO_ARCHIVO /TAMANO)
+//------------------------------------------VARIABLES - MUSICA PARA EL GAME OVER  ------------------------------------------------
 
-volatile int8_t veces = VECES_AUDIO_DISPARO;
 
-volatile uint8_t cual_apunto;
-volatile uint16_t resto;
+typedef enum{
 
-uint8_t buffer_ping[TAMANO];
-uint8_t buffer_pong[TAMANO];
+	disparo_,
+	explosion_,
+	gamerover_
 
-volatile uint8_t *puntero_escritura;
-volatile uint8_t *puntero_lectura;
-volatile uint8_t *puntero_final_lectura;
-volatile uint8_t *puntero_final_escritura;
-uint8_t offset = 0;
+}musica_t;
+
+volatile uint8_t *puntero = tono_622hz;;
+volatile uint8_t *puntero_final_f622 = tono_622hz + 14;
+volatile uint8_t *puntero_final_f587 = tono_587hz + 15;
+volatile uint8_t *puntero_final_f554 = tono_554hz + 16;
+volatile uint8_t *puntero_final_tonos = tonos_variables + sizeof(tonos_variables);
+
+
+tonos_t tonos = f622;
+
+uint8_t conteo = VECES_622HZ;;
+
+
 
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
-
-//------------------------------TRACE HOOKS------------------------------------------------------------------------------------------
-/*
-void callback_in(int tag){
-switch(tag){
-case 0:
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-break;
-case 1:
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
-break;
-case 2:
-HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-break;
-case 3:
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_14, GPIO_PIN_SET);
-break;
-}
-}
-void callback_out(int tag){
-switch(tag){
-case 0:
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-break;
-case 1:
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
-break;
-case 2:
-HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
-break;
-case 3:
-HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
-break;
-}
-}
-*/
-
-
-uint8_t retorno[10];
 
 /* USER CODE END PM */
 
@@ -686,57 +655,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-/*void vApplicationIdleHook( void ){
-
-	vTaskSetApplicationTaskTag( NULL, ( void * ) 3 );
-
-}*/
-
-void swapp(){
-
-
-	if(cual_apunto == 1){	//Escritura en el buffer PING y lectura en el PONG
-
-		puntero_escritura = buffer_ping;
-		puntero_lectura = buffer_pong;
-
-				if(veces == 1){
-
-					puntero_final_escritura = buffer_ping + resto;
-					puntero_final_lectura = buffer_pong + TAMANO;
-				}
-				else if(veces == 0){
-					puntero_final_lectura = buffer_pong + resto;
-				}
-				else if(veces > 1){
-					puntero_final_escritura = buffer_ping + TAMANO;
-					puntero_final_lectura = buffer_pong + TAMANO;
-				}
-
-		}
-
-	else{					//Escritura en el buffer PONG y lectura en el PING
-		puntero_lectura  = buffer_ping;
-		puntero_escritura = buffer_pong;
-
-
-				if(veces == 1){
-
-					puntero_final_escritura = buffer_pong + resto;
-					puntero_final_lectura = buffer_ping + TAMANO;
-				}
-				else if(veces == 0){
-					puntero_lectura = buffer_ping + resto;
-				}
-				else if(veces > 1){
-					puntero_final_escritura = buffer_pong + TAMANO;
-					puntero_final_lectura = buffer_ping + TAMANO;
-				}
-
-			}
-
-
-}
 
 
 /* USER CODE END 4 */
@@ -902,8 +820,7 @@ void entryMemoria(void *argument)
   for(;;)
   {
 
-	  //Espero la notificacion 1 desde la tarea Pantalla/Menu (desde el menu de guardado de nombre) para sincronizar el ordenamiento y guardado
-	  //del nuevo puntaje.
+	  //Espero la notificacion 1 desde la tarea Pantalla/Menu (desde el menu de guardado de nombre) para sincronizar el ordenamiento y guardado del nuevo puntaje.
 	  uint32_t flags = osEventFlagsWait(notificationFlag, NOTIFICATION_VALUE, osFlagsWaitAny, osWaitForever);
 
 	      // Realiza acciones basadas en la notificación recibida
@@ -919,13 +836,10 @@ void entryMemoria(void *argument)
 	    	  osMutexRelease(mutexPuntajesHandle);
 
 
-	    	  //Envio la notificacion 2 para que la tarea PantallaTask pueda pasar del menu guardado_nombre al menu de puntajes una vez que los puntajes
-	    	  //ya se encuentran ordenadas y guardadas, ya que sin esta segunda sincronizacion, puede pasarse al menu puntajes sin que estos se encuentren
-	    	  //ordenados. El ordenado se realiza en esta tarea MemoriaTask ya que las escrituras de puntajes se realizan solo en esta tarea.
+	    	  //Envio la notificacion 2 para que la tarea PantallaTask pueda pasar del menu guardado_nombre al menu de puntajes una vez que los puntajes ya se encuentran ordenadas y guardadas, ya que sin esta segunda sincronizacion, puede pasarse al menu puntajes sin que estos se encuentren ordenados. El ordenado se realiza en esta tarea MemoriaTask ya que las escrituras de puntajes se realizan solo en esta tarea.
 	    	  osEventFlagsSet(notificationFlag2, NOTIFICATION_VALUE2);
 	      }
 
-    //osDelay(1);
   }
   /* USER CODE END entryMemoria */
 }
@@ -941,54 +855,14 @@ void entrySonido(void *argument)
 {
   /* USER CODE BEGIN entrySonido */
 
-	cual_apunto = 1;
-	swapp();
-
-	resto = (TAMANO_ARCHIVO - veces*TAMANO);
-
-
-	/*
-	  //Voy llenando el buffer ping, el puntero apunta a este buffer.
-	  for(uint16_t i=0; i<TAMANO; i++){
-
-		  buffer_pong[i] = audio_disparo[i];
-
-	  }*/
 
 
   /* Infinite loop */
   for(;;)
   {
-	  osSemaphoreAcquire(mySem01Handle, osWaitForever);
+	 // osSemaphoreAcquire(mySem01Handle, osWaitForever);
 
-	  //Esta parte corresponde sólo a la escritura de los buffers. La lectura de los buffers se realiza en la interrupcion por timer.
-
-				  if(veces > 1){
-
-					  for(uint16_t i=0; i<TAMANO; i++){
-
-
-						  *puntero_escritura = audio_disparo[i + offset*((uint16_t)TAMANO)];
-						  puntero_escritura++;
-
-					  }
-				  }
-				  else if(veces == 1){			//Se lee el resto
-
-					  for(uint16_t i=0; i<resto; i++){
-
-
-						  *puntero_escritura = audio_disparo[i + offset*((uint16_t)TAMANO)];
-						  puntero_escritura++;
-
-					  }
-
-
-				  }
-
-				  offset++;
-
-
+	  osDelay(1);
 
   }
   /* USER CODE END entrySonido */
@@ -1015,30 +889,94 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
   if (htim->Instance == TIM3) {
 
-		TIM2->CCR1 = *puntero_lectura;
-		puntero_lectura++;
+	  //BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+		TIM2->CCR1 = *puntero >>2;
+		puntero++;
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
 
 
-		 if(puntero_lectura == puntero_final_lectura){
+		//Musica del Game Over
+	  		switch(tonos){
+			case f622:
+				if(puntero == puntero_final_f622){
+						puntero = tono_622hz;
+						conteo--;
+				}
+				break;
+			case f587:
+				if(puntero == puntero_final_f587){
+						puntero = tono_587hz;
+						conteo--;
+				}
+				break;
+			case f554:
+				if(puntero == puntero_final_f554){
+						puntero = tono_554hz;
+						conteo--;
+				}
+				break;
+			default:	//Tonos variables
+				if(puntero == puntero_final_tonos){
+						puntero = tonos_variables;
+						conteo--;
+				}
+				break;
+			}
 
-				 cual_apunto = !cual_apunto;
-				 veces--;
-				 swapp();
+	  			if(conteo == 0){
 
-				 if(veces < 0 ){
+					switch(tonos){
+					case f622:
+						puntero = tono_587hz;
+						tonos = f587;
+						conteo = VECES_587HZ;
+						break;
+					case f587:
+						puntero = tono_554hz;
+						tonos = f554;
+						conteo = VECES_554HZ;
+						break;
+					case f554:
+						puntero = tonos_variables;
+						tonos = variables;
+						conteo = VECES_TONOS_VARIABLES;
+						break;
+					case variables:	//Tonos variables
 						HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
 						HAL_TIM_Base_Stop_IT(&htim3);
-						offset = 0;
-						//veces = ceil(TAMANO_ARCHIVO /TAMANO);
-						cual_apunto = 1;
-						swapp();
-				 }
 
-				// Notificar a la tarea para sincronización con la interrupción
-				 osSemaphoreRelease (mySem01Handle);
+						break;
+					default:
+						break;
+					}
+	  			}
 
-		 }
+
+		//portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+
+
+			/*
+
+				 if(puntero_lectura == puntero_final_lectura){
+
+						 cual_apunto = !cual_apunto;
+						 veces--;
+						 swapp();
+
+						 if(veces < 0 ){
+								HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+								HAL_TIM_Base_Stop_IT(&htim3);
+								offset = 0;
+								//veces = ceil(TAMANO_ARCHIVO /TAMANO);
+								cual_apunto = 1;
+								swapp();
+						 }
+
+						// Notificar a la tarea para sincronización con la interrupción
+						 osSemaphoreRelease (mySem01Handle);
+
+				 }*/
 
   }
 

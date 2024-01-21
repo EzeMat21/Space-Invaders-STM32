@@ -17,6 +17,8 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 
 extern int8_t veces;
+extern uint8_t conteo;
+
 
 menu_t menu;
 
@@ -132,6 +134,11 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 				getMenu()->juego.retrasoJuego_GameOver = xTaskGetTickCount();
 				getMenu()->juego.flag = 1;
+
+
+				  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+				  HAL_TIM_Base_Start_IT(&htim3);
+				  //osSemaphoreRelease (mySem01Handle);
 			}
 			else{
 				getMenu()->juego.retrasoJuego_GameOver = Tiempo_Actual;
@@ -141,7 +148,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		}
 
 		//Retraso de unos segundos antes de pasar a la pantalla de game over.
-		if(Tiempo_Actual - getMenu()->juego.retrasoJuego_GameOver > pdMS_TO_TICKS(2000)){
+		if(Tiempo_Actual - getMenu()->juego.retrasoJuego_GameOver > pdMS_TO_TICKS(500)){
 			getMenu()->menuActual = game_over;
 		}
 
@@ -151,12 +158,13 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 				getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
 
+				/*
 				if(getDisparo()->numero_disparos == 1){
 					  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 					  HAL_TIM_Base_Start_IT(&htim3);
 					  veces = 4;
 					  osSemaphoreRelease (mySem01Handle);
-				}
+				}*/
 
 		}
 
@@ -598,22 +606,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		if(getMenu()->musica_gameover == true){
 
 
-			  // Play a Wah-Wah-Wah-Wah sound
-			  tone(SPEAKER_PIN, NOTE_DS5);
-			  HAL_Delay(300);
-			  tone(SPEAKER_PIN, NOTE_D5);
-			  HAL_Delay(300);
-			  tone(SPEAKER_PIN, NOTE_CS5);
-			  HAL_Delay(300);
-			  for (byte i = 0; i < 10; i++) {
-			    for (int pitch = -10; pitch <= 10; pitch++) {
-			      tone(SPEAKER_PIN, NOTE_C5 + pitch);
-			      delay(5);
-			    }
-			  }
-			  noTone(SPEAKER_PIN);
-			  HAL_Delay(500);
-
+			//Musica de GameOver
 
 
 			getMenu()->musica_gameover = false;
