@@ -14,10 +14,8 @@
 #include "memoria.h"
 #include "task.h"
 
+#include "tonos.h"
 
-
-#define true 1
-#define false 0
 
 typedef struct{
 
@@ -63,16 +61,6 @@ enum{
 
 };
 
-//Esto para interpretar los botones del joystick.
-enum{
-
-	arriba,
-	abajo,
-	derecha,
-	izquierda,
-	nulo
-
-};
 
 
 //Posicion del cursor en el menú Guardado de nombre
@@ -95,10 +83,6 @@ enum{
 #define POSICION_CURSOR_PUNTAJES 48
 #define POSICION_CURSOR_X 39
 
-
-//Para la cola de notificacion.
-#define NOTIFICATION_VALUE 1
-#define NOTIFICATION_VALUE2 2
 
 
 //Funciones

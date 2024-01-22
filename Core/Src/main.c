@@ -23,12 +23,13 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "invaders.h"
+//#include "invaders.h"
 #include "task.h"
 #include "memoria.h"
 
-#include "sonido.h"
 #include "tonos.h"
+#include "menu.h"
+
 
 
 /* USER CODE END Includes */
@@ -55,25 +56,23 @@ char nombre[5][6];
 //------------------------------------------VARIABLES - MUSICA PARA EL GAME OVER  ------------------------------------------------
 
 
-typedef enum{
 
-	disparo_,
-	explosion_,
-	gamerover_
+musica_t musica;
 
-}musica_t;
-
-volatile uint8_t *puntero = tono_622hz;;
-volatile uint8_t *puntero_final_f622 = tono_622hz + 14;
-volatile uint8_t *puntero_final_f587 = tono_587hz + 15;
-volatile uint8_t *puntero_final_f554 = tono_554hz + 16;
-volatile uint8_t *puntero_final_tonos = tonos_variables + sizeof(tonos_variables);
+volatile uint8_t *puntero_musica;
+volatile uint8_t *puntero_musica_final_f622 = tono_622hz + 14;
+volatile uint8_t *puntero_musica_final_f587 = tono_587hz + 15;
+volatile uint8_t *puntero_musica_final_f554 = tono_554hz + 16;
+volatile uint8_t *puntero_musica_final_tonos = tonos_variables + sizeof(tonos_variables);
 
 
-tonos_t tonos = f622;
+tonos_t tonos;
+uint8_t conteo_musica;
 
-uint8_t conteo = VECES_622HZ;;
 
+//---------------------------------------------------- MUSICA PARA EL DISPARO-------------------------------------------------------------
+
+volatile uint8_t *puntero_final_disparo = audio_disparo + sizeof(audio_disparo);
 
 
 /* USER CODE END PD */
@@ -127,6 +126,11 @@ const osThreadAttr_t SonidoTask_attributes = {
 osMessageQueueId_t queueJoystPantHandle;
 const osMessageQueueAttr_t queueJoystPant_attributes = {
   .name = "queueJoystPant"
+};
+/* Definitions for queueSonidoMenu */
+osMessageQueueId_t queueSonidoMenuHandle;
+const osMessageQueueAttr_t queueSonidoMenu_attributes = {
+  .name = "queueSonidoMenu"
 };
 /* Definitions for mutexPuntajes */
 osMutexId_t mutexPuntajesHandle;
@@ -233,6 +237,9 @@ int main(void)
   /* Create the queue(s) */
   /* creation of queueJoystPant */
   queueJoystPantHandle = osMessageQueueNew (10, sizeof(botones_t), &queueJoystPant_attributes);
+
+  /* creation of queueSonidoMenu */
+  queueSonidoMenuHandle = osMessageQueueNew (10, sizeof(musica_t), &queueSonidoMenu_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -788,7 +795,7 @@ void entryMemoria(void *argument)
 
 	osMutexAcquire(mutexPuntajesHandle, osWaitForever);
 
-
+/*
 	uint8_t buffer[6];
 
 	uint16_t address = MEMORIA_ADDRESS;
@@ -809,7 +816,7 @@ void entryMemoria(void *argument)
 	Write_Memoria(address, puntaje>>8);
 	HAL_Delay(10);
 	address++;
-	Write_Memoria(address, puntaje);
+	Write_Memoria(address, puntaje);*/
 
 	memoriaInit();
 	Ordenamiento_Puntajes();
@@ -831,7 +838,6 @@ void entryMemoria(void *argument)
 
 	    	  //Ordenamiento_Puntajes();
 	    	  //writeNuevosPuntajes(1);
-	    	  //guardarNuevosPuntaje();
 
 	    	  osMutexRelease(mutexPuntajesHandle);
 
@@ -855,14 +861,44 @@ void entrySonido(void *argument)
 {
   /* USER CODE BEGIN entrySonido */
 
-
-
   /* Infinite loop */
   for(;;)
   {
-	 // osSemaphoreAcquire(mySem01Handle, osWaitForever);
+	  osStatus_t res = osMessageQueueGet(queueSonidoMenuHandle, &musica, 0, osWaitForever);	//Se espera a recibir los valores de los botones del joystick
 
-	  osDelay(1);
+	  if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);	//Si no se recibio correctamente, prender led.
+
+	  else{
+		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+
+			HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+			HAL_TIM_Base_Stop_IT(&htim3);
+
+			//musica = musica_;
+
+		  switch(musica){
+		  case gameover_:
+
+				tonos = f622;
+				conteo_musica = VECES_622HZ;
+				puntero_musica = tono_622hz;
+
+			  break;
+		  case disparo_:
+			  puntero_musica = audio_disparo;
+
+			  break;
+		  case explosion_:
+			  break;
+		  default:
+			  break;
+
+		  }
+
+		  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+		  HAL_TIM_Base_Start_IT(&htim3);
+
+	  }
 
   }
   /* USER CODE END entrySonido */
@@ -889,94 +925,83 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
   if (htim->Instance == TIM3) {
 
-	  //BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-		TIM2->CCR1 = *puntero >>2;
-		puntero++;
+		TIM2->CCR1 = *puntero_musica >> 1;
+		puntero_musica++;
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
 
 
-		//Musica del Game Over
-	  		switch(tonos){
-			case f622:
-				if(puntero == puntero_final_f622){
-						puntero = tono_622hz;
-						conteo--;
-				}
-				break;
-			case f587:
-				if(puntero == puntero_final_f587){
-						puntero = tono_587hz;
-						conteo--;
-				}
-				break;
-			case f554:
-				if(puntero == puntero_final_f554){
-						puntero = tono_554hz;
-						conteo--;
-				}
-				break;
-			default:	//Tonos variables
-				if(puntero == puntero_final_tonos){
-						puntero = tonos_variables;
-						conteo--;
-				}
-				break;
-			}
+		switch(musica){
 
-	  			if(conteo == 0){
-
+		 case gameover_:
+			 //Musica del Game Over
 					switch(tonos){
 					case f622:
-						puntero = tono_587hz;
-						tonos = f587;
-						conteo = VECES_587HZ;
+						if(puntero_musica == puntero_musica_final_f622){
+								puntero_musica = tono_622hz;
+								conteo_musica--;
+						}
 						break;
 					case f587:
-						puntero = tono_554hz;
-						tonos = f554;
-						conteo = VECES_554HZ;
+						if(puntero_musica == puntero_musica_final_f587){
+								puntero_musica = tono_587hz;
+								conteo_musica--;
+						}
 						break;
 					case f554:
-						puntero = tonos_variables;
-						tonos = variables;
-						conteo = VECES_TONOS_VARIABLES;
+						if(puntero_musica == puntero_musica_final_f554){
+								puntero_musica = tono_554hz;
+								conteo_musica--;
+						}
 						break;
-					case variables:	//Tonos variables
-						HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
-						HAL_TIM_Base_Stop_IT(&htim3);
-
-						break;
-					default:
+					default:	//Tonos variables
+						if(puntero_musica == puntero_musica_final_tonos){
+								puntero_musica = tonos_variables;
+								conteo_musica--;
+						}
 						break;
 					}
-	  			}
 
+						if(conteo_musica == 0){
 
-		//portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
-
-
-			/*
-
-				 if(puntero_lectura == puntero_final_lectura){
-
-						 cual_apunto = !cual_apunto;
-						 veces--;
-						 swapp();
-
-						 if(veces < 0 ){
+							switch(tonos){
+							case f622:
+								puntero_musica = tono_587hz;
+								tonos = f587;
+								conteo_musica = VECES_587HZ;
+								break;
+							case f587:
+								puntero_musica = tono_554hz;
+								tonos = f554;
+								conteo_musica = VECES_554HZ;
+								break;
+							case f554:
+								puntero_musica = tonos_variables;
+								tonos = variables;
+								conteo_musica = VECES_TONOS_VARIABLES;
+								break;
+							case variables:	//Tonos variables
 								HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
 								HAL_TIM_Base_Stop_IT(&htim3);
-								offset = 0;
-								//veces = ceil(TAMANO_ARCHIVO /TAMANO);
-								cual_apunto = 1;
-								swapp();
-						 }
 
-						// Notificar a la tarea para sincronización con la interrupción
-						 osSemaphoreRelease (mySem01Handle);
+								break;
+							default:
+								break;
+						}
+					}
+		 break;
+		 case disparo_:
 
-				 }*/
+			 if(puntero_musica == puntero_final_disparo){
+					HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+					HAL_TIM_Base_Stop_IT(&htim3);
+			 }
+
+			 break;
+		 case explosion_:
+			 break;
+		 default:
+			 break;
+	 }
 
   }
 

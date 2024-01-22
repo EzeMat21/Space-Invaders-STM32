@@ -1,8 +1,8 @@
-../Core/Src/main.c:669:6:entryJoystick	4
-../Core/Src/main.c:744:6:entryPantalla	2
-../Core/Src/main.c:783:6:entryMemoria	3
-../Core/Src/main.c:854:6:entrySonido	1
-../Core/Src/main.c:287:6:SystemClock_Config	4
-../Core/Src/main.c:177:5:main	15
-../Core/Src/main.c:879:6:HAL_TIM_PeriodElapsedCallback	18
-../Core/Src/main.c:990:6:Error_Handler	1
+../Core/Src/main.c:676:6:entryJoystick	4
+../Core/Src/main.c:751:6:entryPantalla	2
+../Core/Src/main.c:790:6:entryMemoria	2
+../Core/Src/main.c:860:6:entrySonido	4
+../Core/Src/main.c:294:6:SystemClock_Config	4
+../Core/Src/main.c:181:5:main	15
+../Core/Src/main.c:915:6:HAL_TIM_PeriodElapsedCallback	21
+../Core/Src/main.c:1015:6:Error_Handler	1

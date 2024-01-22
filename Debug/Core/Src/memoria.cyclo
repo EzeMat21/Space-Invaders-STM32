@@ -5,4 +5,4 @@
 ../Core/Src/memoria.c:66:6:Read_all	3
 ../Core/Src/memoria.c:98:6:memoriaInit	20
 ../Core/Src/memoria.c:193:6:writeNuevosPuntajes	20
-../Core/Src/memoria.c:359:6:Ordenamiento_Puntajes	9
+../Core/Src/memoria.c:320:6:Ordenamiento_Puntajes	9

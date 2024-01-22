@@ -315,45 +315,6 @@ void writeNuevosPuntajes(uint8_t cambios){
 }
 
 
-
-/*
-
-void guardarNuevosPuntaje(){
-
-	//Actualizar los puntajes y guardarlos en memoria
-	uint16_t address = MEMORIA_ADDRESS+32;
-
-	char buffer[6];
-	strcpy(buffer, getPuntajes(4)->nombre);
-
-
-	uint16_t puntaje1 = getPuntajes(4)->puntaje;
-
-	uint8_t i=0;
-
-	Write_Memoria(address, buffer[i]);
-
-		do{
-
-			if(i== 6){
-				Write_Memoria(address, puntaje1>>8);
-			}
-			if(i==7){
-				Write_Memoria(address, puntaje1);
-			}
-			else{
-				Write_Memoria(address, buffer[i]);
-			}
-
-			i++;
-			address++;
-			HAL_Delay(10);
-
-		}while(i != 9);
-
-}*/
-
-
 //Hay que corregir el ordenamiento de puntajes.
 
 void Ordenamiento_Puntajes(){

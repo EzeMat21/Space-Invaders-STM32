@@ -10,5 +10,5 @@
 ../Core/Src/invaders.c:108:6:InvaderInit	3
 ../Core/Src/invaders.c:123:6:plotAliens	23
 ../Core/Src/invaders.c:246:6:disparoInit	1
-../Core/Src/invaders.c:259:6:disparar	13
+../Core/Src/invaders.c:259:6:disparar	12
 ../Core/Src/invaders.c:339:6:disparoAliens	7

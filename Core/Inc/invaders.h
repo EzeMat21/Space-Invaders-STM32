@@ -11,8 +11,10 @@
 
 
 #include "ssd1306.h"
-#include "menu.h"
+//#include "menu.h"
+#include "defines.h"
 #include "figuras.h"
+
 
 
 

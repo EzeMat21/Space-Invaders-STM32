@@ -1,8 +1,8 @@
-../Core/Src/main.c:669:6:entryJoystick	40	static
-../Core/Src/main.c:744:6:entryPantalla	24	static
-../Core/Src/main.c:783:6:entryMemoria	32	static
-../Core/Src/main.c:854:6:entrySonido	8	static
-../Core/Src/main.c:287:6:SystemClock_Config	88	static,ignoring_inline_asm
-../Core/Src/main.c:177:5:main	80	static,ignoring_inline_asm
-../Core/Src/main.c:879:6:HAL_TIM_PeriodElapsedCallback	8	static
-../Core/Src/main.c:990:6:Error_Handler	0	static,ignoring_inline_asm
+../Core/Src/main.c:676:6:entryJoystick	40	static
+../Core/Src/main.c:751:6:entryPantalla	24	static
+../Core/Src/main.c:790:6:entryMemoria	24	static
+../Core/Src/main.c:860:6:entrySonido	16	static
+../Core/Src/main.c:294:6:SystemClock_Config	88	static,ignoring_inline_asm
+../Core/Src/main.c:181:5:main	80	static,ignoring_inline_asm
+../Core/Src/main.c:915:6:HAL_TIM_PeriodElapsedCallback	8	static
+../Core/Src/main.c:1015:6:Error_Handler	0	static,ignoring_inline_asm

@@ -13,14 +13,16 @@ extern osEventFlagsId_t notificationFlag2;
 
 extern osSemaphoreId_t mySem01Handle;
 
+extern osMessageQueueId_t queueSonidoMenuHandle;
+
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 
-extern int8_t veces;
-extern uint8_t conteo;
-
-
 menu_t menu;
+
+extern musica_t musica;
+
+
 
 menu_t *getMenu(){
 
@@ -135,10 +137,13 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 				getMenu()->juego.retrasoJuego_GameOver = xTaskGetTickCount();
 				getMenu()->juego.flag = 1;
 
+				musica_t musica_ = gameover_;
 
-				  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-				  HAL_TIM_Base_Start_IT(&htim3);
-				  //osSemaphoreRelease (mySem01Handle);
+				osStatus_t res = osMessageQueuePut(queueSonidoMenuHandle, &musica_, 0, 0);
+				if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+
+
+
 			}
 			else{
 				getMenu()->juego.retrasoJuego_GameOver = Tiempo_Actual;
@@ -154,17 +159,20 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 
 		//Prender led si se apretó el boton
-		if(boton == true){
+		if(boton == true && getPlayer()->vivo == true ){
 
 				getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
 
-				/*
+
 				if(getDisparo()->numero_disparos == 1){
-					  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-					  HAL_TIM_Base_Start_IT(&htim3);
-					  veces = 4;
-					  osSemaphoreRelease (mySem01Handle);
-				}*/
+
+					musica_t musica_ = disparo_;
+
+					osStatus_t res = osMessageQueuePut(queueSonidoMenuHandle, &musica_, 0, 0);
+					if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+
+
+				}
 
 		}
 
@@ -602,16 +610,6 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		//SSD1306_Puts("GAME OVER", &Font_7x10, 1);
 
 		SSD1306_DrawBitmap(15, 10, game_over_figura, 100, 40, 1);
-
-		if(getMenu()->musica_gameover == true){
-
-
-			//Musica de GameOver
-
-
-			getMenu()->musica_gameover = false;
-		}
-
 
 		if(y == arriba){
 

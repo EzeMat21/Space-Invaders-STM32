@@ -259,7 +259,7 @@ void disparoInit(){
 void disparar(){
 
 
-			if(getDisparo()->numero_disparos == 1 && getPlayer()->vivo == true ){
+			if(getDisparo()->numero_disparos == 1){
 				getDisparo()->disparo = true;
 				getDisparo()->posicion_x = getPlayer()->posicion_X;
 			}
