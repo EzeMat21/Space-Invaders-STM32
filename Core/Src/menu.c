@@ -12,6 +12,7 @@ extern osEventFlagsId_t notificationFlag;
 extern osEventFlagsId_t notificationFlag2;
 
 extern osSemaphoreId_t mySem01Handle;
+extern osMutexId_t myMutexPuntajeHandle;
 
 extern osMessageQueueId_t queueSonidoMenuHandle;
 
@@ -49,9 +50,9 @@ void menuInit(){
 
 
 	//Se inicializa el cursor de la pantalla principal.
-	//getMenu()->menuActual =  guardar_nombre;
+	getMenu()->menuActual =  progresion_niveles;
 	//getMenu()->menuActual = menu_principal;
-	getMenu()->menuActual = juego;
+	//getMenu()->menuActual = juego;
 	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 
 
@@ -117,15 +118,14 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 	case juego:
 
+		uint8_t numero_aliens = getDisparoAliens()->numero_disparos;
+
+		plotBases();
+
 		//Se grafican el player, aliens y disparo.
 		plotPlayer(x, getPlayer());
 		plotAliens();
 		disparoAliens();
-
-		if( getDisparoAliens()->numero_disparos == 0){
-
-			getMenu()->menuActual = progresion_niveles;
-		}
 
 
 		TickType_t Tiempo_Actual = xTaskGetTickCount();
@@ -137,6 +137,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 				getMenu()->juego.retrasoJuego_GameOver = xTaskGetTickCount();
 				getMenu()->juego.flag = 1;
 
+				//Se genera el sonido del game over.
 				musica_t musica_ = gameover_;
 
 				osStatus_t res = osMessageQueuePut(queueSonidoMenuHandle, &musica_, 0, 0);
@@ -166,6 +167,8 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 				if(getDisparo()->numero_disparos == 1){
 
+					//Se genera el sonido del disparo.
+
 					musica_t musica_ = disparo_;
 
 					osStatus_t res = osMessageQueuePut(queueSonidoMenuHandle, &musica_, 0, 0);
@@ -176,8 +179,26 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 		}
 
-
 		disparar();
+
+
+		//Se genera el sonido de la explosion de los aliens.
+		if(getDisparoAliens()->numero_disparos != numero_aliens && getPlayer()->vivo == true){
+
+			musica_t musica_ = explosion_;
+
+			osStatus_t res = osMessageQueuePut(queueSonidoMenuHandle, &musica_, 0, 0);
+			if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+
+		}
+
+
+		//Se ha completado el nivel, paso al menu 'progresion_niveles'.
+		if( getDisparoAliens()->numero_disparos == 0){
+
+			getMenu()->menuActual = progresion_niveles;
+		}
+
 
 
 		break;
@@ -186,20 +207,34 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 	case progresion_niveles:
 
-		SSD1306_GotoXY(15, 15);
-		SSD1306_Puts("PUNTAJE ACTUAL", &Font_7x10, 1);
+		uint8_t buffer_puntaje[2];
+		char cantidad_vidas;
 
-		//Incremento de la dificultad (Aumento de la velocidad de los aliens y la velocidad de disparo)
-		//...
+		SSD1306_GotoXY(25, 15);
+		SSD1306_Puts("PUNTAJE: ", &Font_7x10, 1);
 
-		//Se inicializan las dificultades
-		getDificultad()->velocidad_horizontal = 6;
-		getDificultad()->velocidad_bajada = 2;
-		getDificultad()->velocidad_disparo_aliens = 3;
+		SSD1306_GotoXY(25, 35);
+		SSD1306_Puts("VIDAS", &Font_7x10, 1);
+
+		SSD1306_DrawBitmap(65, 34, vida, 8, 8, 1);
+
+		SSD1306_GotoXY(74, 34);
+		SSD1306_Putc(':', &Font_7x10, 1);
+
+
+		//Se plotea el puntaje
+		SSD1306_GotoXY(90, 15);
+		itoa(getPlayer()->puntaje,(char*)buffer_puntaje,10);
+		SSD1306_Puts((char *)buffer_puntaje, &Font_7x10, 1);
+
+		//Se plotea la cantidad de vidas.
+		SSD1306_GotoXY(90, 34);
+		itoa(getPlayer()->vidas, &cantidad_vidas,10);
+		SSD1306_Puts(&cantidad_vidas, &Font_7x10, 1);
 
 
 		//Se REinicializan las posiciones iniciales del player y de los aliens.
-		playerInit();
+		AumentoNivel();		//Aqui se reinicializa el player y se aumenta la dificultad del nivel.
 		InvaderInit();
 		disparoInit();
 
@@ -229,7 +264,6 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 		//Nombres
 
-		osMutexAcquire(mutexPuntajesHandle, osWaitForever);
 
 		for(uint8_t j=0; j<5;j++){
 
@@ -252,7 +286,6 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		}
 
 
-		osMutexRelease(mutexPuntajesHandle);
 
 
 		switch(y){
@@ -540,9 +573,14 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 										if((getMenu()->GuardarNombre.indice != 0 )){
 
+											osMutexAcquire(myMutexPuntajeHandle, osWaitForever);
+
+											getPuntajes(4)->puntaje  = getPlayer()->puntaje;
 
 											//Guardo el nuevo nombre en la posicion 5 de getPuntajes()->nombre.
 											strcpy(getPuntajes(4)->nombre,getMenu()->GuardarNombre.nombre);
+
+											osMutexRelease(myMutexPuntajeHandle);
 
 
 										    // Notifica a la tarea Task2 utilizando VTaskNotify

@@ -11,10 +11,8 @@
 
 
 #include "ssd1306.h"
-//#include "menu.h"
 #include "defines.h"
 #include "figuras.h"
-
 
 
 
@@ -22,10 +20,11 @@
 
 typedef struct{
 
-	uint8_t nombre;
 	uint8_t posicion_X;
 	uint8_t vivo;
-	uint16_t score;
+	uint8_t vidas;
+	uint16_t puntaje;
+	uint8_t nivel;
 
 
 }player_t;
@@ -44,7 +43,7 @@ typedef struct{
 
 
 #define OFFSET_INICIO 10
-//#define TAMANO_ALIEN_CHICO 8
+#define TAMANO_ALIEN_BOTTOM 12
 #define TAMANO_ALIEN 8
 #define ESPACIO_ENTRE_COLUMNAS 5
 #define ESPACIO_ENTRE_FILAS 3
@@ -59,7 +58,7 @@ typedef struct{
 
 typedef struct{
 
-	uint8_t posicion_X;
+	int8_t posicion_X;
 	uint8_t posicion_Y;
 	uint8_t vivo;
 	uint8_t explosion;
@@ -92,6 +91,9 @@ typedef struct{
 	uint8_t conteo_horizontal;
 	uint8_t conteo_bajada;
 	uint8_t animacion;
+
+	uint8_t alien_columna_izquierda;
+	uint8_t alien_columna_derecha;
 
 
 }movimiento_aliens_t;
@@ -131,15 +133,19 @@ alien_t *getAlien(uint8_t fila, uint8_t columna);
 movimiento_aliens_t *getMovAliens();
 void InvaderInit();
 void plotAliens();
+disparo_t *getDisparoAliens();
+void disparoAliens();
 
 //Funciones disparo Player
 disparo_t *getDisparo();
 void disparoInit();
 void disparar();
 
-disparo_t *getDisparoAliens();
-void disparoAliens();
-
+//Dificultades
 dificultad_t *getDificultad();
+void AumentoNivel();
+
+//Bases defensivas
+void plotBases();
 
 #endif /* INC_INVADERS_H_ */

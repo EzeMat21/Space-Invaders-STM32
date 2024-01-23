@@ -74,7 +74,7 @@ void Read_all(uint16_t address, uint16_t tamano, uint8_t *buffer){
 	uint8_t comando[2] = { ((uint16_t)READ<<3) + (address>>8 & 0xFF), address & 0xFF};
 	HAL_SPI_Transmit(&hspi1, comando, 2, 100);
 
-	//HAL_Delay(10);
+	HAL_Delay(10);
 
 	HAL_SPI_Receive(&hspi1, &dato_anterior, 1, HAL_MAX_DELAY);
 
@@ -85,9 +85,10 @@ void Read_all(uint16_t address, uint16_t tamano, uint8_t *buffer){
 		*buffer = (dato_anterior<<1) + (dato_actual>>7);
 		buffer++;
 		dato_anterior = dato_actual;
-
+		//HAL_Delay(1);
 	}
 
+	HAL_Delay(10);
 
 	HAL_GPIO_WritePin(CHIP_SELECT_PORT, CHIP_SELECT_PIN, GPIO_PIN_RESET);
 
@@ -190,7 +191,7 @@ void memoriaInit(){
 
 
 
-void writeNuevosPuntajes(uint8_t cambios){
+void writeNuevosPuntajes(uint8_t permutaciones){
 
 
 	char buff_nuevosPuntajes[TAMANO_TOTAL_PUNTAJES];
@@ -240,28 +241,28 @@ void writeNuevosPuntajes(uint8_t cambios){
 			k = 0;
 			break;
 		case 7:
-			buff_nuevosPuntajes[i] = getPuntajes(0)->puntaje && 0xFF;
+			buff_nuevosPuntajes[i] = getPuntajes(0)->puntaje & 0xFF;
 			break;
 		case 14:
 			buff_nuevosPuntajes[i] = getPuntajes(1)->puntaje >>8;
 			k = 0;
 			break;
 		case 15:
-			buff_nuevosPuntajes[i] = getPuntajes(1)->puntaje && 0xFF;
+			buff_nuevosPuntajes[i] = getPuntajes(1)->puntaje & 0xFF;
 			break;
 		case 22:
 			buff_nuevosPuntajes[i] = getPuntajes(2)->puntaje >>8;
 			k = 0;
 			break;
 		case 23:
-			buff_nuevosPuntajes[i] = getPuntajes(2)->puntaje && 0xFF;
+			buff_nuevosPuntajes[i] = getPuntajes(2)->puntaje & 0xFF;
 			break;
 		case 30:
 			buff_nuevosPuntajes[i] = getPuntajes(3)->puntaje >>8;
 			k = 0;
 			break;
 		case 31:
-			buff_nuevosPuntajes[i] = getPuntajes(3)->puntaje && 0xFF;
+			buff_nuevosPuntajes[i] = getPuntajes(3)->puntaje & 0xFF;
 			break;
 		case 38:
 			buff_nuevosPuntajes[i] = getPuntajes(4)->puntaje >>8;
@@ -286,7 +287,7 @@ void writeNuevosPuntajes(uint8_t cambios){
 	HAL_Delay(10);
 
 
-		if(cambios > 1){
+		if(permutaciones > 0){
 
 			address = MEMORIA_ADDRESS;
 
@@ -317,11 +318,12 @@ void writeNuevosPuntajes(uint8_t cambios){
 
 //Hay que corregir el ordenamiento de puntajes.
 
-void Ordenamiento_Puntajes(){
+uint8_t Ordenamiento_Puntajes(){
 
 	//Tengo que hacer un ordenamiento de un vector de 5 para acomodar los puntajes de mayor a menor.
 	//En principio el ordenamiento lo realizará el menú (dentro de la tarea menu/pantalla)
 
+	uint8_t permutaciones = 0;
 
 	uint16_t vector[5];
 	char buff_nombre[5][6];
@@ -347,6 +349,8 @@ void Ordenamiento_Puntajes(){
 						auxiliar = vector[j-1];
 						vector[j-1] = vector[j];
 						vector[j] = auxiliar;
+
+						permutaciones++;
 
 					}
 
@@ -392,10 +396,62 @@ void Ordenamiento_Puntajes(){
 	}
 
 
-
+	return permutaciones;
 
 }
 
+
+void Write_PuntajesEjemplos(){
+
+	uint16_t puntaje[5];
+	char buffer[5][6];
+
+	strcpy(buffer[0], "lindo");
+	puntaje[0] = 2450;
+
+	strcpy(buffer[1], "boris");
+	puntaje[1] = 12000;
+
+	strcpy(buffer[2], "eze");
+	puntaje[2] = 9999;
+
+	strcpy(buffer[3], "josep");
+	puntaje[3] = 1000;
+
+	strcpy(buffer[4], "juan");
+	puntaje[4] = 600;
+
+	Write_Enable();
+	HAL_Delay(10);
+
+	uint16_t address = MEMORIA_ADDRESS;
+	uint8_t j = 0;
+
+	while(j != 5){
+
+
+
+		for(uint8_t i=0;i<6;i++){
+
+			Write_Memoria(address, buffer[j][i]);
+			address++;
+			HAL_Delay(10);
+		}
+
+		Write_Memoria(address, puntaje[j]>>8);
+		HAL_Delay(10);
+		address++;
+		Write_Memoria(address, puntaje[j]);
+		address++;
+		HAL_Delay(10);
+
+		j++;
+
+	}
+
+
+
+}
 
 
 

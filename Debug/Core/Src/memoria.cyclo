@@ -3,6 +3,7 @@
 ../Core/Src/memoria.c:37:6:Write_Memoria	1
 ../Core/Src/memoria.c:48:9:Read_memoria	1
 ../Core/Src/memoria.c:66:6:Read_all	3
-../Core/Src/memoria.c:98:6:memoriaInit	20
-../Core/Src/memoria.c:193:6:writeNuevosPuntajes	20
-../Core/Src/memoria.c:320:6:Ordenamiento_Puntajes	9
+../Core/Src/memoria.c:99:6:memoriaInit	20
+../Core/Src/memoria.c:194:6:writeNuevosPuntajes	20
+../Core/Src/memoria.c:321:9:Ordenamiento_Puntajes	9
+../Core/Src/memoria.c:404:6:Write_PuntajesEjemplos	3

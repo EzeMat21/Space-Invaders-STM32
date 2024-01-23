@@ -45,34 +45,26 @@ typedef struct{
 
 }botones_t;
 
-char nombre[5][6];
-
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-//------------------------------------------VARIABLES - MUSICA PARA EL GAME OVER  ------------------------------------------------
-
-
+//------------------------------------------VARIABLES - MUSICA PARA EL GAME OVER, DISPARO Y EXPLOSIONES  ------------------------------------
 
 musica_t musica;
 
 volatile uint8_t *puntero_musica;
-volatile uint8_t *puntero_musica_final_f622 = tono_622hz + 14;
-volatile uint8_t *puntero_musica_final_f587 = tono_587hz + 15;
-volatile uint8_t *puntero_musica_final_f554 = tono_554hz + 16;
-volatile uint8_t *puntero_musica_final_tonos = tonos_variables + sizeof(tonos_variables);
-
+volatile uint8_t *puntero_musica_final_f622 = tono_622hz + TAMANO_BUFF_TONO_622;
+volatile uint8_t *puntero_musica_final_f587 = tono_587hz + TAMANO_BUFF_TONO_587;
+volatile uint8_t *puntero_musica_final_f554 = tono_554hz + TAMANO_BUFF_TONO_554;
+volatile uint8_t *puntero_musica_final_tonos = tonos_variables + TAMANO_BUFF_TONOS_VARIABLES;
+volatile uint8_t *puntero_final_disparo = audio_disparo + TAMANO_BUFF_AUDIO_DISPARO;
+volatile uint8_t *puntero_final_explosion = audio_explosion + TAMANO_BUFF_AUDIO_EXPLOSION;
 
 tonos_t tonos;
 uint8_t conteo_musica;
-
-
-//---------------------------------------------------- MUSICA PARA EL DISPARO-------------------------------------------------------------
-
-volatile uint8_t *puntero_final_disparo = audio_disparo + sizeof(audio_disparo);
 
 
 /* USER CODE END PD */
@@ -132,10 +124,10 @@ osMessageQueueId_t queueSonidoMenuHandle;
 const osMessageQueueAttr_t queueSonidoMenu_attributes = {
   .name = "queueSonidoMenu"
 };
-/* Definitions for mutexPuntajes */
-osMutexId_t mutexPuntajesHandle;
-const osMutexAttr_t mutexPuntajes_attributes = {
-  .name = "mutexPuntajes"
+/* Definitions for myMutexPuntaje */
+osMutexId_t myMutexPuntajeHandle;
+const osMutexAttr_t myMutexPuntaje_attributes = {
+  .name = "myMutexPuntaje"
 };
 /* Definitions for mySem01 */
 osSemaphoreId_t mySem01Handle;
@@ -215,8 +207,8 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
   /* Create the mutex(es) */
-  /* creation of mutexPuntajes */
-  mutexPuntajesHandle = osMutexNew(&mutexPuntajes_attributes);
+  /* creation of myMutexPuntaje */
+  myMutexPuntajeHandle = osMutexNew(&myMutexPuntaje_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -793,54 +785,23 @@ void entryMemoria(void *argument)
 
 	//vTaskSetApplicationTaskTag( NULL, ( void * ) 2 );
 
-	osMutexAcquire(mutexPuntajesHandle, osWaitForever);
+	uint8_t permutaciones;
 
-/*
-	uint8_t buffer[6];
-
-	uint16_t address = MEMORIA_ADDRESS;
-
-	strcpy(buffer, "lindo");
-	uint16_t puntaje = 2450;
-
-	Write_Enable();
-	HAL_Delay(10);
-
-	for(uint8_t i=0;i<6;i++){
-
-		Write_Memoria(address, buffer[i]);
-		address++;
-		HAL_Delay(10);
-	}
-
-	Write_Memoria(address, puntaje>>8);
-	HAL_Delay(10);
-	address++;
-	Write_Memoria(address, puntaje);*/
-
+	//Se leen los datos desde la memoria.
 	memoriaInit();
-	Ordenamiento_Puntajes();
-
-	osMutexRelease(mutexPuntajesHandle);
 
   /* Infinite loop */
   for(;;)
   {
-
 	  //Espero la notificacion 1 desde la tarea Pantalla/Menu (desde el menu de guardado de nombre) para sincronizar el ordenamiento y guardado del nuevo puntaje.
 	  uint32_t flags = osEventFlagsWait(notificationFlag, NOTIFICATION_VALUE, osFlagsWaitAny, osWaitForever);
 
 	      // Realiza acciones basadas en la notificación recibida
 	      if (flags == NOTIFICATION_VALUE)
 	      {
-	    	  //Acceso al mutex, ya que se comparte el periférico SPI con la tarea SonidoTask.
-	    	  osMutexAcquire(mutexPuntajesHandle, osWaitForever);
 
-	    	  //Ordenamiento_Puntajes();
-	    	  //writeNuevosPuntajes(1);
-
-	    	  osMutexRelease(mutexPuntajesHandle);
-
+				permutaciones = Ordenamiento_Puntajes();
+				//writeNuevosPuntajes(permutaciones);
 
 	    	  //Envio la notificacion 2 para que la tarea PantallaTask pueda pasar del menu guardado_nombre al menu de puntajes una vez que los puntajes ya se encuentran ordenadas y guardadas, ya que sin esta segunda sincronizacion, puede pasarse al menu puntajes sin que estos se encuentren ordenados. El ordenado se realiza en esta tarea MemoriaTask ya que las escrituras de puntajes se realizan solo en esta tarea.
 	    	  osEventFlagsSet(notificationFlag2, NOTIFICATION_VALUE2);
@@ -889,6 +850,7 @@ void entrySonido(void *argument)
 
 			  break;
 		  case explosion_:
+			  puntero_musica = audio_explosion;
 			  break;
 		  default:
 			  break;
@@ -929,80 +891,83 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		puntero_musica++;
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
 
-
 		switch(musica){
 
-		 case gameover_:
-			 //Musica del Game Over
-					switch(tonos){
-					case f622:
-						if(puntero_musica == puntero_musica_final_f622){
-								puntero_musica = tono_622hz;
-								conteo_musica--;
-						}
-						break;
-					case f587:
-						if(puntero_musica == puntero_musica_final_f587){
-								puntero_musica = tono_587hz;
-								conteo_musica--;
-						}
-						break;
-					case f554:
-						if(puntero_musica == puntero_musica_final_f554){
-								puntero_musica = tono_554hz;
-								conteo_musica--;
-						}
-						break;
-					default:	//Tonos variables
-						if(puntero_musica == puntero_musica_final_tonos){
-								puntero_musica = tonos_variables;
-								conteo_musica--;
-						}
-						break;
-					}
+					 case gameover_:
+						 //Musica del Game Over
+								switch(tonos){
+								case f622:
+									if(puntero_musica == puntero_musica_final_f622){
+											puntero_musica = tono_622hz;
+											conteo_musica--;
+									}
+									break;
+								case f587:
+									if(puntero_musica == puntero_musica_final_f587){
+											puntero_musica = tono_587hz;
+											conteo_musica--;
+									}
+									break;
+								case f554:
+									if(puntero_musica == puntero_musica_final_f554){
+											puntero_musica = tono_554hz;
+											conteo_musica--;
+									}
+									break;
+								default:	//Tonos variables
+									if(puntero_musica == puntero_musica_final_tonos){
+											puntero_musica = tonos_variables;
+											conteo_musica--;
+									}
+									break;
+								}
 
-						if(conteo_musica == 0){
+									if(conteo_musica == 0){
 
-							switch(tonos){
-							case f622:
-								puntero_musica = tono_587hz;
-								tonos = f587;
-								conteo_musica = VECES_587HZ;
-								break;
-							case f587:
-								puntero_musica = tono_554hz;
-								tonos = f554;
-								conteo_musica = VECES_554HZ;
-								break;
-							case f554:
-								puntero_musica = tonos_variables;
-								tonos = variables;
-								conteo_musica = VECES_TONOS_VARIABLES;
-								break;
-							case variables:	//Tonos variables
+										switch(tonos){
+										case f622:
+											puntero_musica = tono_587hz;
+											tonos = f587;
+											conteo_musica = VECES_587HZ;
+											break;
+										case f587:
+											puntero_musica = tono_554hz;
+											tonos = f554;
+											conteo_musica = VECES_554HZ;
+											break;
+										case f554:
+											puntero_musica = tonos_variables;
+											tonos = variables;
+											conteo_musica = VECES_TONOS_VARIABLES;
+											break;
+										case variables:	//Tonos variables
+											HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+											HAL_TIM_Base_Stop_IT(&htim3);
+
+											break;
+										default:
+											break;
+									}
+								}
+					 break;
+					 case disparo_:
+
+						 if(puntero_musica == puntero_final_disparo){
 								HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
 								HAL_TIM_Base_Stop_IT(&htim3);
+						 }
 
-								break;
-							default:
-								break;
-						}
-					}
-		 break;
-		 case disparo_:
+						 break;
+					 case explosion_:
 
-			 if(puntero_musica == puntero_final_disparo){
-					HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
-					HAL_TIM_Base_Stop_IT(&htim3);
-			 }
-
-			 break;
-		 case explosion_:
-			 break;
-		 default:
-			 break;
-	 }
-
+						 if(puntero_musica == puntero_final_explosion){
+								HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+								HAL_TIM_Base_Stop_IT(&htim3);
+						 }
+						 break;
+					 default:
+						 break;
+				 }
   }
 
   /* USER CODE END Callback 1 */

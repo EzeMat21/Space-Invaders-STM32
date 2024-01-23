@@ -57,9 +57,10 @@ void Read_all(uint16_t address, uint16_t tamano, uint8_t *buffer);
 void memoriaInit();
 
 
-void Ordenamiento_Puntajes();
+uint8_t Ordenamiento_Puntajes();
 void guardarNuevosPuntaje();
-void writeNuevosPuntajes(uint8_t cambios);
+void writeNuevosPuntajes(uint8_t permutaciones);
+void Write_PuntajesEjemplos();
 
 
 #endif /* INC_MEMORIA_H_ */

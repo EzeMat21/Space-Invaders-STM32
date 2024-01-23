@@ -66,6 +66,9 @@ void playerInit(){
 
 	getPlayer()->posicion_X = 64;
 	getPlayer()->vivo = true;
+	getPlayer()->puntaje = 900;
+	getPlayer()->vidas = 3;
+	getPlayer()->nivel = 1;
 }
 
 void plotPlayer(uint8_t direccion, player_t *player){
@@ -108,6 +111,8 @@ void plotPlayer(uint8_t direccion, player_t *player){
 void InvaderInit(){
 
 	getMovAliens()->orientacion = mov_derecha;
+	getMovAliens()->alien_columna_derecha = NUM_ALIEN_COLUMNA - 1;
+	getMovAliens()->alien_columna_izquierda = 0;
 
 	for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 		for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
@@ -121,7 +126,6 @@ void InvaderInit(){
 }
 
 void plotAliens(){
-
 
 	//Esta parte se encarga de ir moviendo los aliens de izquierda a derecha, derecha a izquierda.
 	if(getMovAliens()->conteo_horizontal % dificultad.velocidad_horizontal == 0){
@@ -164,11 +168,13 @@ void plotAliens(){
 
 	//Aqui se cambia la orientacion de los aliens: cuando se llega al borde de la pantalla los aliens pasan a moverse hacia la derecha o hacia la izquierda.
 
-			if( (getAlien(0,6)->posicion_X + TAMANO_ALIEN + 4) >= 127){
+			if( (getAlien(0,getMovAliens()->alien_columna_derecha)->posicion_X + TAMANO_ALIEN_BOTTOM) >= 127){
 
 				getMovAliens()->orientacion = mov_izquierda;
 			}
-			if( (getAlien(0,0)->posicion_X) <= 0){
+
+
+			if( (getAlien(0,getMovAliens()->alien_columna_izquierda)->posicion_X) <= 0){
 				getMovAliens()->orientacion = mov_derecha;
 				getMovAliens()->conteo_bajada = getMovAliens()->conteo_bajada + 1;
 			}
@@ -192,9 +198,25 @@ void plotAliens(){
 	getMovAliens()->conteo_horizontal = getMovAliens()->conteo_horizontal + 1;
 
 
+	uint8_t conteo_columna_derecha = 0;
+	uint8_t conteo_columna_izquierda = 0;
+
 	//Acá se grafican los aliens en la pantalla.
 	//Se grafican los aliens que solo estan vivos.
 		for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
+
+			if(getMovAliens()->alien_columna_derecha != getMovAliens()->alien_columna_izquierda){
+
+				if(getAlien(y,getMovAliens()->alien_columna_derecha)->vivo == false){
+					conteo_columna_derecha++;
+				}
+
+				else if(getAlien(y,getMovAliens()->alien_columna_izquierda)->vivo == false){
+					conteo_columna_izquierda++;
+				}
+
+			}
+
 			for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
 
 					switch(y){
@@ -239,6 +261,24 @@ void plotAliens(){
 			}
 
 		}
+
+		uint8_t debug1, debug2;
+
+		if(conteo_columna_derecha == 3){
+			getMovAliens()->alien_columna_derecha= getMovAliens()->alien_columna_derecha - 1;
+
+		}
+
+		if(conteo_columna_izquierda == 3){
+			getMovAliens()->alien_columna_izquierda= getMovAliens()->alien_columna_izquierda + 1;
+		}
+
+		if(getMovAliens()->alien_columna_izquierda == getMovAliens()->alien_columna_derecha){
+
+			debug1 = getMovAliens()->alien_columna_derecha;
+			debug2 = getMovAliens()->alien_columna_izquierda;
+		}
+
 
 }
 
@@ -315,6 +355,22 @@ void disparar(){
 									//getDisparoAliens()->numero_disparos se interpretará como aliens eliminados.
 									getDisparoAliens()->numero_disparos = getDisparoAliens()->numero_disparos - 1;
 
+
+									//Puntajes del Player
+									switch(y){
+									case 0:
+										getPlayer()->puntaje = (getPlayer()->puntaje) + (PUNTAJE_ALIEN_TOP*(getPlayer()->nivel));
+										break;
+									case 1:
+										getPlayer()->puntaje = (getPlayer()->puntaje) + (PUNTAJE_ALIEN_MIDDLE*(getPlayer()->nivel));
+										break;
+									case 2:
+										getPlayer()->puntaje = (getPlayer()->puntaje) + (PUNTAJE_ALIEN_BOTTOM*(getPlayer()->nivel));
+										break;
+
+									}
+
+
 								}
 
 
@@ -348,7 +404,13 @@ void disparoAliens(){
 
 					if( (getDisparoAliens()->posicion_x + 1 >= getPlayer()->posicion_X) &  (getDisparoAliens()->posicion_x + 1 <= getPlayer()->posicion_X + 6) ){
 						getDisparoAliens()->disparo = false;
-						getPlayer()->vivo = false;
+						getPlayer()->vidas = getPlayer()->vidas - 1;
+
+
+						//Si me quedo sin vidas, el player se elimina.
+						if(getPlayer()->vidas == 0){
+							getPlayer()->vivo = false;
+						}
 					}
 
 					else if(getDisparoAliens()->posicion_y >= 60){
@@ -384,9 +446,30 @@ void disparoAliens(){
 }
 
 
+void plotBases(){
+
+	SSD1306_DrawBitmap(16, 45, BaseGfx, 16, 8, 1);
+	SSD1306_DrawBitmap(56, 45, BaseGfx, 16, 8, 1);
+	SSD1306_DrawBitmap(96, 45, BaseGfx, 16, 8, 1);
+
+}
 
 
+void AumentoNivel(){
 
+	//Incremento de la dificultad (Aumento de la velocidad de los aliens y la velocidad de disparo)
+	//Se aumenta la dificultad.
+	getDificultad()->velocidad_horizontal = 6;
+	getDificultad()->velocidad_bajada = 2;
+	getDificultad()->velocidad_disparo_aliens = 3;
+
+
+	//Se Reinicializa el Player.
+	getPlayer()->posicion_X = 64;
+	getPlayer()->vivo = true;
+	getPlayer()->nivel = getPlayer()->nivel + 1;
+
+}
 
 
 

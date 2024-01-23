@@ -199,4 +199,16 @@ static const unsigned char game_over_figura[] = {
 };
 
 
+static const uint8_t vida[] = {
+
+		0b00000000,
+		0b00000000,
+		0b01101100,
+		0b11111110,
+		0b11111110,
+		0b01111100,
+		0b00111000,
+		0b00010000
+};
+
 #endif /* INC_FIGURAS_H_ */
