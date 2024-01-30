@@ -1,21 +1,21 @@
 
 ### SPACE INVADERS UTILIZANDO RTOS
 
-### DIAGRAMA DE TAREAS
--JoystickTask
--PantallaTask
--SonidoTask
--MemoriaTask
+## DIAGRAMA DE TAREAS
+- JoystickTask
+- PantallaTask
+- SonidoTask
+- MemoriaTask
 
 
-##RESULTADOS
+## RESULTADOS
 ### Menúes del Juego:
--Pantalla Principal
--Juego
--Progresión de niveles
--Puntajes
--Game Over
--Guardado del Nombre
+- Pantalla Principal
+- Juego
+- Progresión de niveles
+- Puntajes
+- Game Over
+- Guardado del Nombre
 
 
 ![IMG_20240129_205832](https://github.com/EzeMat21/Space-Invaders/assets/126365409/1a87f3f8-44d9-4632-a522-726cd72ca1c2)
