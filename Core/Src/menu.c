@@ -23,14 +23,6 @@ menu_t menu;
 
 extern musica_t musica;
 
-
-
-menu_t *getMenu(){
-
-	return &menu;
-}
-
-
 void menuInit(){
 
 	//Inicializacion de la pantalla.
@@ -42,29 +34,28 @@ void menuInit(){
 	playerInit();
 	InvaderInit();
 	disparoInit();
+	BasesInit();
 
 	//Se inicializan las dificultades
-	getDificultad()->velocidad_horizontal = 8;
-	getDificultad()->velocidad_bajada = 1;
-	getDificultad()->velocidad_disparo_aliens = 3;
+	Dificultad_Init();
 
 
 	//Se inicializa el cursor de la pantalla principal.
-	getMenu()->menuActual =  progresion_niveles;
-	//getMenu()->menuActual = menu_principal;
-	//getMenu()->menuActual = juego;
-	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
+	//menu.menuActual =  progresion_niveles;
+	menu.menuActual = menu_principal;
+	//menu.menuActual = juego;
+	menu.posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 
 
 	//Se inicializa el cursor de la pantalla Guardado de nombre
-	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
-	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
-	getMenu()->GuardarNombre.indice = 0;
+	menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+	menu.GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
+	menu.GuardarNombre.indice = 0;
 
 
 
 	//Para las variables de juego
-	getMenu()->juego.flag = 0;
+	menu.juego.flag = 0;
 
 
 }
@@ -72,7 +63,7 @@ void menuInit(){
 void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 
-	switch(getMenu()->menuActual){
+	switch(menu.menuActual){
 
 //--------------------------------------------------------------MENU PRINCIPAL-----------------------------------------------------------------------------
 	case menu_principal:
@@ -86,23 +77,23 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 
 		if(y == arriba){
-			getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
+			menu.posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 		}
 		else if(y == abajo){
-			getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_PUNTAJES;
+			menu.posicion_MenuPrincipal = POSICION_CURSOR_PUNTAJES;
 		}
 
-		SSD1306_DrawCircle(POSICION_CURSOR_X, getMenu()->posicion_MenuPrincipal, 3, 1);
+		SSD1306_DrawCircle(POSICION_CURSOR_X, menu.posicion_MenuPrincipal, 3, 1);
 
 
 		switch(boton){
 		case true:
-			if(getMenu()->posicion_MenuPrincipal == POSICION_CURSOR_JUGAR){
-				getMenu()->menuActual = juego;
+			if(menu.posicion_MenuPrincipal == POSICION_CURSOR_JUGAR){
+				menu.menuActual = juego;
 			}
-			else if(getMenu()->posicion_MenuPrincipal == POSICION_CURSOR_PUNTAJES){
+			else if(menu.posicion_MenuPrincipal == POSICION_CURSOR_PUNTAJES){
 
-			    getMenu()->menuActual = puntajes;
+			    menu.menuActual = puntajes;
 
 			}
 			break;
@@ -118,24 +109,30 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 	case juego:
 
-		uint8_t numero_aliens = getDisparoAliens()->numero_disparos;
+		uint8_t numero_aliens = getDisparoAliens().numero_disparos;
+
+
+		//Pruebas
+		//SSD1306_DrawBitmap(0, 0, AlienBombGfx, 2, 4, 1);
+		//SSD1306_DrawBitmap(0, 4, AlienBombGfx, 2, 4, 1);
+
 
 		plotBases();
 
 		//Se grafican el player, aliens y disparo.
-		plotPlayer(x, getPlayer());
+		plotPlayer(x);
 		plotAliens();
 		disparoAliens();
 
 
 		TickType_t Tiempo_Actual = xTaskGetTickCount();
 
-		if(getMenu()->juego.flag == 0){
+		if(menu.juego.flag == 0){
 
-			if(getPlayer()->vivo == false){
+			if(getPlayer().vivo == false){
 
-				getMenu()->juego.retrasoJuego_GameOver = xTaskGetTickCount();
-				getMenu()->juego.flag = 1;
+				menu.juego.retrasoJuego_GameOver = xTaskGetTickCount();
+				menu.juego.flag = 1;
 
 				//Se genera el sonido del game over.
 				musica_t musica_ = gameover_;
@@ -147,20 +144,20 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 			}
 			else{
-				getMenu()->juego.retrasoJuego_GameOver = Tiempo_Actual;
+				menu.juego.retrasoJuego_GameOver = Tiempo_Actual;
 
 			}
 
 		}
 
 		//Retraso de unos segundos antes de pasar a la pantalla de game over.
-		if(Tiempo_Actual - getMenu()->juego.retrasoJuego_GameOver > pdMS_TO_TICKS(500)){
-			getMenu()->menuActual = game_over;
+		if(Tiempo_Actual - menu.juego.retrasoJuego_GameOver > pdMS_TO_TICKS(500)){
+			menu.menuActual = game_over;
 		}
 
 
 		//Prender led si se apretó el boton
-		if(boton == true && getPlayer()->vivo == true ){
+		if(boton == true && getPlayer().vivo == true ){
 
 				getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
 
@@ -183,7 +180,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 
 		//Se genera el sonido de la explosion de los aliens.
-		if(getDisparoAliens()->numero_disparos != numero_aliens && getPlayer()->vivo == true){
+		if(getDisparoAliens().numero_disparos != numero_aliens && getPlayer().vivo == true){
 
 			musica_t musica_ = explosion_;
 
@@ -194,9 +191,9 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 
 		//Se ha completado el nivel, paso al menu 'progresion_niveles'.
-		if( getDisparoAliens()->numero_disparos == 0){
+		if( getDisparoAliens().numero_disparos == 0){
 
-			getMenu()->menuActual = progresion_niveles;
+			menu.menuActual = progresion_niveles;
 		}
 
 
@@ -224,12 +221,12 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 		//Se plotea el puntaje
 		SSD1306_GotoXY(90, 15);
-		itoa(getPlayer()->puntaje,(char*)buffer_puntaje,10);
+		itoa(getPlayer().puntaje,(char*)buffer_puntaje,10);
 		SSD1306_Puts((char *)buffer_puntaje, &Font_7x10, 1);
 
 		//Se plotea la cantidad de vidas.
 		SSD1306_GotoXY(90, 34);
-		itoa(getPlayer()->vidas, &cantidad_vidas,10);
+		itoa(getPlayer().vidas, &cantidad_vidas,10);
 		SSD1306_Puts(&cantidad_vidas, &Font_7x10, 1);
 
 
@@ -237,10 +234,11 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		AumentoNivel();		//Aqui se reinicializa el player y se aumenta la dificultad del nivel.
 		InvaderInit();
 		disparoInit();
+		BasesInit();
 
 		if(y == arriba){
 
-			getMenu()->menuActual = juego;
+			menu.menuActual = juego;
 
 		}
 
@@ -290,7 +288,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 		switch(y){
 		case arriba:
-				getMenu()->menuActual = menu_principal;
+				menu.menuActual = menu_principal;
 			break;
 		default:
 			break;
@@ -370,37 +368,37 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			Timenow = xTaskGetTickCount();
 
 			//Este if es para generar un retraso al mover el cursor en el eje x como en el ya que sino se mueve demasiado rapido.
-			if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_y) > pdMS_TO_TICKS(150) && (y!=nulo)){
+			if((Timenow - menu.GuardarNombre.xLastWakeTime_y) > pdMS_TO_TICKS(150) && (y!=nulo)){
 
-				getMenu()->GuardarNombre.xLastWakeTime_y = xTaskGetTickCount();
+				menu.GuardarNombre.xLastWakeTime_y = xTaskGetTickCount();
 
 			switch(mov){
 				case arriba:
 
-					switch(getMenu()->GuardarNombre.posicion_y){
+					switch(menu.GuardarNombre.posicion_y){
 						case GUARDADO_POSICION_Y2:
-							getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
+							menu.GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
 							break;
 
 						case GUARDADO_POSICION_Y3:
 
-							getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y2;
+							menu.GuardarNombre.posicion_y = GUARDADO_POSICION_Y2;
 
-							if(getMenu()->GuardarNombre.posicion_x >= GUARDADO_POSICION_X3_INICIAL ){
+							if(menu.GuardarNombre.posicion_x >= GUARDADO_POSICION_X3_INICIAL ){
 
-								div = getMenu()->GuardarNombre.posicion_x - (GUARDADO_POSICION_X3_INICIAL);
+								div = menu.GuardarNombre.posicion_x - (GUARDADO_POSICION_X3_INICIAL);
 
-								if(div < 0) getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+								if(div < 0) menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
 
 								else{
 
 									div = div / GUARDADO_OFFSET_X_CURSOR;
 
-									 getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL + (div+1)*GUARDADO_OFFSET_X_CURSOR ;
+									 menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL + (div+1)*GUARDADO_OFFSET_X_CURSOR ;
 									}
 								}
 							else{
-								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+								menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
 							}
 
 							break;
@@ -411,25 +409,25 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 				case abajo:
 
-					switch(getMenu()->GuardarNombre.posicion_y){
+					switch(menu.GuardarNombre.posicion_y){
 						case GUARDADO_POSICION_Y1:
-							getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y2;
+							menu.GuardarNombre.posicion_y = GUARDADO_POSICION_Y2;
 							break;
 
 						case GUARDADO_POSICION_Y2:
-							getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y3;
+							menu.GuardarNombre.posicion_y = GUARDADO_POSICION_Y3;
 
-							div = getMenu()->GuardarNombre.posicion_x - (GUARDADO_POSICION_X_INICIAL);
+							div = menu.GuardarNombre.posicion_x - (GUARDADO_POSICION_X_INICIAL);
 							div = div/GUARDADO_OFFSET_X_CURSOR;
 
 							if(div == 0){
-								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
+								menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
 							}
 							else if(div == 8 || div == 9){
-								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_ENTER;
+								menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_ENTER;
 							}
 							else{
-								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL + (div-1)*GUARDADO_OFFSET_X_CURSOR;
+								menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL + (div-1)*GUARDADO_OFFSET_X_CURSOR;
 							}
 
 							break;
@@ -448,58 +446,58 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			Timenow = xTaskGetTickCount();
 
 			//Este if es para generar un retraso al mover el cursor en el eje x como en el ya que sino se mueve demasiado rapido.
-		if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_x) > pdMS_TO_TICKS(100) && (x!=nulo) ){
+		if((Timenow - menu.GuardarNombre.xLastWakeTime_x) > pdMS_TO_TICKS(100) && (x!=nulo) ){
 
-			getMenu()->GuardarNombre.xLastWakeTime_x= xTaskGetTickCount();
+			menu.GuardarNombre.xLastWakeTime_x= xTaskGetTickCount();
 
 			switch(mov){
 				case izquierda:
 
-					getMenu()->GuardarNombre.posicion_x = getMenu()->GuardarNombre.posicion_x - GUARDADO_OFFSET_X_CURSOR;
+					menu.GuardarNombre.posicion_x = menu.GuardarNombre.posicion_x - GUARDADO_OFFSET_X_CURSOR;
 
-					if(getMenu()->GuardarNombre.posicion_y != GUARDADO_POSICION_Y3){
+					if(menu.GuardarNombre.posicion_y != GUARDADO_POSICION_Y3){
 
-						if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_INICIAL - GUARDADO_OFFSET_X_CURSOR)){
-							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_FINAL;
+						if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_INICIAL - GUARDADO_OFFSET_X_CURSOR)){
+							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_FINAL;
 						}
 					}
 					else{
-						if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X3_INICIAL - GUARDADO_OFFSET_X_CURSOR) ){
+						if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X3_INICIAL - GUARDADO_OFFSET_X_CURSOR) ){
 
-							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
+							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
 						}
-						else if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_ENTER - GUARDADO_OFFSET_X_CURSOR)){
+						else if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_ENTER - GUARDADO_OFFSET_X_CURSOR)){
 
-							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_FINAL;
+							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X3_FINAL;
 						}
 
-						else if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_BORRAR - GUARDADO_OFFSET_X_CURSOR)){
+						else if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_BORRAR - GUARDADO_OFFSET_X_CURSOR)){
 
-							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
+							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
 						}
 					}
 
 					break;
 				case derecha:
 
-					getMenu()->GuardarNombre.posicion_x = getMenu()->GuardarNombre.posicion_x + GUARDADO_OFFSET_X_CURSOR;
+					menu.GuardarNombre.posicion_x = menu.GuardarNombre.posicion_x + GUARDADO_OFFSET_X_CURSOR;
 
-					if(getMenu()->GuardarNombre.posicion_y != GUARDADO_POSICION_Y3){
+					if(menu.GuardarNombre.posicion_y != GUARDADO_POSICION_Y3){
 
-						if(getMenu()->GuardarNombre.posicion_x > GUARDADO_POSICION_X_FINAL){
-								getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+						if(menu.GuardarNombre.posicion_x > GUARDADO_POSICION_X_FINAL){
+								menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
 						}
 					}
 					else{
 
-						if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X3_FINAL + GUARDADO_OFFSET_X_CURSOR)){
-							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_ENTER;
+						if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X3_FINAL + GUARDADO_OFFSET_X_CURSOR)){
+							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_ENTER;
 						}
-						else if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_ENTER + GUARDADO_OFFSET_X_CURSOR)){
-							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
+						else if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_ENTER + GUARDADO_OFFSET_X_CURSOR)){
+							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
 						}
-						else if(getMenu()->GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_BORRAR + GUARDADO_OFFSET_X_CURSOR)){
-							getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL;
+						else if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_BORRAR + GUARDADO_OFFSET_X_CURSOR)){
+							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X3_INICIAL;
 						}
 					}
 
@@ -514,30 +512,30 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			Timenow = xTaskGetTickCount();
 
 			//Este if es para generar un retraso al mover el cursor en el eje x como en el ya que sino se mueve demasiado rapido.
-		if((Timenow - getMenu()->GuardarNombre.xLastWakeTime_boton) > pdMS_TO_TICKS(100) && (boton !=false) ){
+		if((Timenow - menu.GuardarNombre.xLastWakeTime_boton) > pdMS_TO_TICKS(100) && (boton !=false) ){
 
-			getMenu()->GuardarNombre.xLastWakeTime_boton= xTaskGetTickCount();
+			menu.GuardarNombre.xLastWakeTime_boton= xTaskGetTickCount();
 
 
 			//uint8_t indice_debug;
 			//uint8_t buffer_debug[6];
 
 
-			if((boton == true) && (getMenu()->GuardarNombre.indice <= 5)){
+			if((boton == true) && (menu.GuardarNombre.indice <= 5)){
 
-						if((getMenu()->GuardarNombre.posicion_y != GUARDADO_POSICION_Y3)){
+						if((menu.GuardarNombre.posicion_y != GUARDADO_POSICION_Y3)){
 
-							div = getMenu()->GuardarNombre.posicion_x - GUARDADO_POSICION_X_INICIAL;
+							div = menu.GuardarNombre.posicion_x - GUARDADO_POSICION_X_INICIAL;
 							div = div / (GUARDADO_OFFSET_X_CURSOR);
 
-							if((getMenu()->GuardarNombre.posicion_y == GUARDADO_POSICION_Y1)){
-								getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = buff_qwerty[div];
-								getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice + 1;
+							if((menu.GuardarNombre.posicion_y == GUARDADO_POSICION_Y1)){
+								menu.GuardarNombre.nombre[menu.GuardarNombre.indice] = buff_qwerty[div];
+								menu.GuardarNombre.indice = menu.GuardarNombre.indice + 1;
 
 							}
-							else if((getMenu()->GuardarNombre.posicion_y == GUARDADO_POSICION_Y2)){
-								getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = buff_asdf[div];
-								getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice + 1;
+							else if((menu.GuardarNombre.posicion_y == GUARDADO_POSICION_Y2)){
+								menu.GuardarNombre.nombre[menu.GuardarNombre.indice] = buff_asdf[div];
+								menu.GuardarNombre.indice = menu.GuardarNombre.indice + 1;
 							}
 
 						}
@@ -545,40 +543,40 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 						else{
 
-							div = getMenu()->GuardarNombre.posicion_x - GUARDADO_POSICION_X3_INICIAL;
+							div = menu.GuardarNombre.posicion_x - GUARDADO_POSICION_X3_INICIAL;
 
 							if(div < 0){	//SI SE APRIETA EL BOTON BORRAR
 
 
-								//indice_debug = getMenu()->GuardarNombre.indice;
-								//strcpy(buffer_debug,getMenu()->GuardarNombre.nombre );
+								//indice_debug = menu.GuardarNombre.indice;
+								//strcpy(buffer_debug,menu.GuardarNombre.nombre );
 
-								getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice - 1;
-								if(getMenu()->GuardarNombre.indice < 0){
-										getMenu()->GuardarNombre.indice = 0;
+								menu.GuardarNombre.indice = menu.GuardarNombre.indice - 1;
+								if(menu.GuardarNombre.indice < 0){
+										menu.GuardarNombre.indice = 0;
 									}
 
-								getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = '\0';
+								menu.GuardarNombre.nombre[menu.GuardarNombre.indice] = '\0';
 
-								//indice_debug = getMenu()->GuardarNombre.indice;
-								//strcpy(buffer_debug,getMenu()->GuardarNombre.nombre );
+								//indice_debug = menu.GuardarNombre.indice;
+								//strcpy(buffer_debug,menu.GuardarNombre.nombre );
 
 							}
 							else{
 								div = div / GUARDADO_OFFSET_X_CURSOR;
 
-								//indice_debug = getMenu()->GuardarNombre.indice;
+								//indice_debug = menu.GuardarNombre.indice;
 
 									if(div == 7){	//SI SE APRIETA EL BOTON ENTER
 
-										if((getMenu()->GuardarNombre.indice != 0 )){
+										if((menu.GuardarNombre.indice != 0 )){
 
 											osMutexAcquire(myMutexPuntajeHandle, osWaitForever);
 
-											getPuntajes(4)->puntaje  = getPlayer()->puntaje;
+											getPuntajes(4)->puntaje  = getPlayer().puntaje;
 
 											//Guardo el nuevo nombre en la posicion 5 de getPuntajes()->nombre.
-											strcpy(getPuntajes(4)->nombre,getMenu()->GuardarNombre.nombre);
+											strcpy(getPuntajes(4)->nombre,menu.GuardarNombre.nombre);
 
 											osMutexRelease(myMutexPuntajeHandle);
 
@@ -595,7 +593,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 										    	menuReset();
 
 
-										    	getMenu()->menuActual = puntajes;
+										    	menu.menuActual = puntajes;
 
 										    }
 
@@ -605,10 +603,10 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 									}
 									else{
 
-										getMenu()->GuardarNombre.nombre[getMenu()->GuardarNombre.indice] = buff_zxc[div];
-										getMenu()->GuardarNombre.indice = getMenu()->GuardarNombre.indice + 1;
+										menu.GuardarNombre.nombre[menu.GuardarNombre.indice] = buff_zxc[div];
+										menu.GuardarNombre.indice = menu.GuardarNombre.indice + 1;
 
-										//indice_debug = getMenu()->GuardarNombre.indice;
+										//indice_debug = menu.GuardarNombre.indice;
 
 									}
 
@@ -617,9 +615,9 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 							}
 
-						if(getMenu()->GuardarNombre.indice > 5){
-							getMenu()->GuardarNombre.indice = 5;
-							getMenu()->GuardarNombre.nombre[5] = '\0';
+						if(menu.GuardarNombre.indice > 5){
+							menu.GuardarNombre.indice = 5;
+							menu.GuardarNombre.nombre[5] = '\0';
 						}
 
 				}
@@ -631,11 +629,11 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 
 				//Se actualiza el cursor
-				SSD1306_DrawFilledCircle(getMenu()->GuardarNombre.posicion_x,  getMenu()->GuardarNombre.posicion_y, 5, 1);
+				SSD1306_DrawFilledCircle(menu.GuardarNombre.posicion_x,  menu.GuardarNombre.posicion_y, 5, 1);
 
 				//Se actualiza el nombre en el recuadro.
 				SSD1306_GotoXY(43, 5);
-				SSD1306_Puts(getMenu()->GuardarNombre.nombre, &Font_7x10, 1);
+				SSD1306_Puts(menu.GuardarNombre.nombre, &Font_7x10, 1);
 
 
 		break;
@@ -652,7 +650,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		if(y == arriba){
 
 			GuardarNombreReset();
-			getMenu()->menuActual = guardar_nombre;
+			menu.menuActual = guardar_nombre;
 
 		}
 
@@ -672,16 +670,14 @@ void menuReset(){
 	disparoInit();
 
 	//Se reinician las dificultades al nivel 1
-	getDificultad()->velocidad_horizontal = 8;
-	getDificultad()->velocidad_bajada = 1;
-	getDificultad()->velocidad_disparo_aliens = 3;
+	Dificultad_Init();
 
 
 	//Para las variables de juego
-	getMenu()->juego.flag = 0;
+	menu.juego.flag = 0;
 
 	//Se inicializa el cursor de la pantalla principal.
-	getMenu()->posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
+	menu.posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
 
 }
 
@@ -689,10 +685,10 @@ void menuReset(){
 void GuardarNombreReset(){
 
 	//Se inicializa el cursor de la pantalla Guardado de nombre
-	getMenu()->GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
-	getMenu()->GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
-	getMenu()->GuardarNombre.indice = 0;
-	strcpy(getMenu()->GuardarNombre.nombre,"     ");
+	menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
+	menu.GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
+	menu.GuardarNombre.indice = 0;
+	strcpy(menu.GuardarNombre.nombre,"     ");
 
 }
 

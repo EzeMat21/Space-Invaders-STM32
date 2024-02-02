@@ -1,5 +1,4 @@
-../Core/Src/menu.c:28:9:getMenu	0	static
-../Core/Src/menu.c:34:6:menuInit	8	static
-../Core/Src/menu.c:667:6:menuReset	8	static
-../Core/Src/menu.c:689:6:GuardarNombreReset	0	static
-../Core/Src/menu.c:72:6:menuActualizar	88	static
+../Core/Src/menu.c:26:6:menuInit	8	static
+../Core/Src/menu.c:665:6:menuReset	8	static
+../Core/Src/menu.c:685:6:GuardarNombreReset	0	static
+../Core/Src/menu.c:63:6:menuActualizar	136	static

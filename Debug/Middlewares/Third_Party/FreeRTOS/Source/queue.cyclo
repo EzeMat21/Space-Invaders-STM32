@@ -1,8 +1,11 @@
-../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2256:19:prvIsQueueEmpty	1
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2014:21:prvGetDisinheritPriorityAfterTimeout	2
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2295:19:prvIsQueueFull	2
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2256:19:prvIsQueueEmpty	2
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2039:19:prvCopyDataToQueue	8
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2118:13:prvCopyDataFromQueue	3
-../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2136:13:prvUnlockQueue	9
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2136:13:prvUnlockQueue	7
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:247:12:xQueueGenericReset	5
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:408:13:prvInitialiseNewQueue	2
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:302:16:xQueueGenericCreateStatic	8
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:358:16:xQueueGenericCreate	4
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:518:8:xQueueGetMutexHolder	2
@@ -17,7 +20,7 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:923:12:xQueueGenericSendFromISR	12
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1074:12:xQueueGiveFromISR	10
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1239:12:xQueueReceive	17
-../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1380:12:xQueueSemaphoreTake	21
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1380:12:xQueueSemaphoreTake	20
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:629:13:xQueueTakeMutexRecursive	4
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1599:12:xQueuePeek	17
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1749:12:xQueueReceiveFromISR	9
@@ -28,8 +31,8 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1984:14:uxQueueGetQueueNumber	1
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1994:7:vQueueSetQueueNumber	1
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2004:10:ucQueueGetQueueType	1
-../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2277:12:xQueueIsQueueEmptyFromISR	2
-../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2316:12:xQueueIsQueueFullFromISR	2
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2277:12:xQueueIsQueueEmptyFromISR	3
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2316:12:xQueueIsQueueFullFromISR	3
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2611:7:vQueueAddToRegistry	3
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2640:14:pcQueueGetName	3
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2668:7:vQueueUnregisterQueue	3

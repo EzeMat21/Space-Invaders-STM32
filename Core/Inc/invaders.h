@@ -33,6 +33,10 @@ typedef struct{
 //---------------------------------------------------------------Aliens-------------------------------------------------------
 
 
+#define TAMANO_NAVE_Y 8
+#define TOTAL_PIXELES_Y 64
+
+
 #define NUM_ALIEN_COLUMNA 7
 #define NUM_ALIEN_FILA 3
 #define ESPACIO_ALIENS 1
@@ -42,8 +46,8 @@ typedef struct{
 #define TAMANO_ALIEN_BOTTOM 12
 
 
-#define OFFSET_INICIO 10
-#define TAMANO_ALIEN_BOTTOM 12
+
+#define OFFSET_INICIO 11
 #define TAMANO_ALIEN 8
 #define ESPACIO_ENTRE_COLUMNAS 5
 #define ESPACIO_ENTRE_FILAS 3
@@ -53,6 +57,24 @@ typedef struct{
 #define PUNTAJE_ALIEN_TOP 30
 #define PUNTAJE_ALIEN_MIDDLE 20
 #define PUNTAJE_ALIEN_BOTTOM 10
+
+#define PUNTAJE_ADICIONAL 5
+
+
+//Defines para la base
+
+#define POS_OFF_DISPARO_PLAYER 4
+#define LIMITE_IZQ_X_BASE1 16
+#define LIMITE_DER_X_BASE1 31
+#define LIMITE_IZQ_X_BASE2 56
+#define LIMITE_DER_X_BASE2 71
+#define LIMITE_IZQ_X_BASE3 96
+#define LIMITE_DER_X_BASE3 111
+#define LIMITE_ARRIBA_BASE 38
+#define LIMITE_ABAJO_BASE 45
+
+#define OFFSET_DESPLAZAMIENTO 15
+#define RANDOM_MAX_2 2
 
 
 
@@ -115,6 +137,19 @@ typedef struct{
 
 }disparo_t;
 
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+//Bases
+
+typedef struct{
+
+	uint8_t buffer[16];
+	uint8_t lim_der;
+	uint8_t lim_izq;
+	uint8_t lim_arriba;
+	uint8_t lim_abajo;
+
+}base_t;
+
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,16 +159,14 @@ typedef struct{
 void actualizarPantalla();
 
 //Funciones Player
-player_t *getPlayer();
+player_t getPlayer();
 void playerInit();
-void plotPlayer(uint8_t direccion, player_t *player);
+void plotPlayer(uint8_t direccion);
 
 //Funciones Aliens
-alien_t *getAlien(uint8_t fila, uint8_t columna);
-movimiento_aliens_t *getMovAliens();
 void InvaderInit();
 void plotAliens();
-disparo_t *getDisparoAliens();
+disparo_t getDisparoAliens();
 void disparoAliens();
 
 //Funciones disparo Player
@@ -142,10 +175,12 @@ void disparoInit();
 void disparar();
 
 //Dificultades
-dificultad_t *getDificultad();
+//dificultad_t *getDificultad();
 void AumentoNivel();
+void Dificultad_Init();
 
 //Bases defensivas
 void plotBases();
+void BasesInit();
 
 #endif /* INC_INVADERS_H_ */

@@ -21,35 +21,23 @@ disparo_t Disparo_Aliens;
 
 
 dificultad_t dificultad;
-
+base_t bases[3];
+//uint8_t bases[3][16];
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-player_t *getPlayer(){
+player_t getPlayer(){
 
-	return &Player;
-}
-
-alien_t *getAlien(uint8_t fila, uint8_t columna){
-	return &Alien[fila][columna];
-}
-
-movimiento_aliens_t *getMovAliens(){
-	return &movimiento_Aliens;
+	return Player;
 }
 
 disparo_t *getDisparo(){
 	return &Disparo;
 }
 
-disparo_t *getDisparoAliens(){
-	return &Disparo_Aliens;
-}
-
-dificultad_t *getDificultad(){
-
-	return &dificultad;
+disparo_t getDisparoAliens(){
+	return Disparo_Aliens;
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,43 +52,44 @@ void actualizarPantalla(){
 
 void playerInit(){
 
-	getPlayer()->posicion_X = 64;
-	getPlayer()->vivo = true;
-	getPlayer()->puntaje = 900;
-	getPlayer()->vidas = 3;
-	getPlayer()->nivel = 1;
+	Player.posicion_X = 64;
+	Player.vivo = true;
+	Player.puntaje = 0;
+	Player.vidas = 5;
+	Player.nivel = 1;
+
 }
 
-void plotPlayer(uint8_t direccion, player_t *player){
+void plotPlayer(uint8_t direccion){
 
-	if(getPlayer()->vivo == true){
+	if(Player.vivo == true){
 
 		if(direccion == derecha){
 
-			if(player->posicion_X >= 120){
-				player->posicion_X = 120;
+			if(Player.posicion_X >= 120){
+				Player.posicion_X = 120;
 			}
 			else{
-				player->posicion_X = player->posicion_X + 4;
+				Player.posicion_X = Player.posicion_X + 4;
 			}
 
 		}
 		else if(direccion == izquierda){
 
-			if(player->posicion_X <= 0){
-				player->posicion_X = 0;
+			if(Player.posicion_X <= 0){
+				Player.posicion_X = 0;
 			}
 			else{
-				player->posicion_X = player->posicion_X - 4;
+				Player.posicion_X = Player.posicion_X - 4;
 			}
 		}
 
-		SSD1306_DrawBitmap(player->posicion_X, 56, nave, 8,8,1);
+		SSD1306_DrawBitmap(Player.posicion_X, 56, nave, 8,8,1);
 	}
 
 	else{	//Si el jugador ha sido eliminado.
 
-		SSD1306_DrawBitmap(player->posicion_X, 56, nave_explotada, 8,8,1);
+		SSD1306_DrawBitmap(Player.posicion_X, 56, nave_explotada, 8,8,1);
 	}
 
 
@@ -110,16 +99,16 @@ void plotPlayer(uint8_t direccion, player_t *player){
 
 void InvaderInit(){
 
-	getMovAliens()->orientacion = mov_derecha;
-	getMovAliens()->alien_columna_derecha = NUM_ALIEN_COLUMNA - 1;
-	getMovAliens()->alien_columna_izquierda = 0;
+	movimiento_Aliens.orientacion = mov_derecha;
+	movimiento_Aliens.alien_columna_derecha = NUM_ALIEN_COLUMNA - 1;
+	movimiento_Aliens.alien_columna_izquierda = 0;
 
 	for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 		for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
-			getAlien(y,x)->posicion_X  =  OFFSET_INICIO + x*(TAMANO_ALIEN+ ESPACIO_ENTRE_COLUMNAS);
-			getAlien(y,x)->posicion_Y = y*(TAMANO_ALIEN+ ESPACIO_ENTRE_FILAS);
-			getAlien(y, x)->vivo = true;
-			getAlien(y, x)->conteo_explosion = 2;
+			Alien[y][x].posicion_X  =  OFFSET_INICIO + x*(TAMANO_ALIEN+ ESPACIO_ENTRE_COLUMNAS);
+			Alien[y][x].posicion_Y = y*(TAMANO_ALIEN+ ESPACIO_ENTRE_FILAS);
+			Alien[y][x].vivo = true;
+			Alien[y][x].conteo_explosion = 2;
 		}
 	}
 
@@ -128,21 +117,17 @@ void InvaderInit(){
 void plotAliens(){
 
 	//Esta parte se encarga de ir moviendo los aliens de izquierda a derecha, derecha a izquierda.
-	if(getMovAliens()->conteo_horizontal % dificultad.velocidad_horizontal == 0){
+	if(movimiento_Aliens.conteo_horizontal % dificultad.velocidad_horizontal == 0){
 
-		/*getMovAliens()->animacion = getMovAliens()->animacion + 1;
-		if(getMovAliens()->animacion >= 8){
-			getMovAliens()->animacion = 0;
-		}*/
+		movimiento_Aliens.animacion = !movimiento_Aliens.animacion;
 
-		getMovAliens()->animacion = !getMovAliens()->animacion;
-
-			switch(getMovAliens()->orientacion){
+			switch(movimiento_Aliens.orientacion){
 				case mov_derecha:
 
 						for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 							for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
-								getAlien(y,x)->posicion_X  = getAlien(y,x)->posicion_X + 2;
+
+								Alien[y][x].posicion_X  = Alien[y][x].posicion_X + 2;
 
 
 							}
@@ -155,7 +140,7 @@ void plotAliens(){
 						for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 							for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
 
-								getAlien(y,x)->posicion_X  = getAlien(y,x)->posicion_X - 2;
+								Alien[y][x].posicion_X  = Alien[y][x].posicion_X - 2;
 
 							}
 						}
@@ -168,26 +153,26 @@ void plotAliens(){
 
 	//Aqui se cambia la orientacion de los aliens: cuando se llega al borde de la pantalla los aliens pasan a moverse hacia la derecha o hacia la izquierda.
 
-			if( (getAlien(0,getMovAliens()->alien_columna_derecha)->posicion_X + TAMANO_ALIEN_BOTTOM) >= 127){
+			if( (Alien[0][movimiento_Aliens.alien_columna_derecha].posicion_X + TAMANO_ALIEN_BOTTOM) > 127){
 
-				getMovAliens()->orientacion = mov_izquierda;
+				movimiento_Aliens.orientacion = mov_izquierda;
 			}
 
 
-			if( (getAlien(0,getMovAliens()->alien_columna_izquierda)->posicion_X) <= 0){
-				getMovAliens()->orientacion = mov_derecha;
-				getMovAliens()->conteo_bajada = getMovAliens()->conteo_bajada + 1;
+			if( (Alien[0][movimiento_Aliens.alien_columna_izquierda].posicion_X) < 0){
+				movimiento_Aliens.orientacion = mov_derecha;
+				movimiento_Aliens.conteo_bajada = movimiento_Aliens.conteo_bajada + 1;
 			}
 
 
 
 		//Esta parte se encarga de ir bajando los aliens.
-			if(getMovAliens()->conteo_bajada == 10){
+			if(movimiento_Aliens.conteo_bajada == 10){
 				for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 					for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
 
-						getAlien(y,x)->posicion_Y  = getAlien(y,x)->posicion_Y + dificultad.velocidad_bajada;
-						getMovAliens()->conteo_bajada = 0;
+						Alien[y][x].posicion_Y  = Alien[y][x].posicion_Y + dificultad.velocidad_bajada;
+						movimiento_Aliens.conteo_bajada = 0;
 
 					}
 				}
@@ -195,7 +180,7 @@ void plotAliens(){
 
 	}
 
-	getMovAliens()->conteo_horizontal = getMovAliens()->conteo_horizontal + 1;
+	movimiento_Aliens.conteo_horizontal = movimiento_Aliens.conteo_horizontal + 1;
 
 
 	uint8_t conteo_columna_derecha = 0;
@@ -205,13 +190,13 @@ void plotAliens(){
 	//Se grafican los aliens que solo estan vivos.
 		for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 
-			if(getMovAliens()->alien_columna_derecha != getMovAliens()->alien_columna_izquierda){
+			if(movimiento_Aliens.alien_columna_derecha != movimiento_Aliens.alien_columna_izquierda){
 
-				if(getAlien(y,getMovAliens()->alien_columna_derecha)->vivo == false){
+				if(Alien[y][movimiento_Aliens.alien_columna_derecha].vivo == false){
 					conteo_columna_derecha++;
 				}
 
-				else if(getAlien(y,getMovAliens()->alien_columna_izquierda)->vivo == false){
+				else if(Alien[y][movimiento_Aliens.alien_columna_izquierda].vivo == false){
 					conteo_columna_izquierda++;
 				}
 
@@ -222,38 +207,38 @@ void plotAliens(){
 					switch(y){
 
 					case 0:
-						if(getAlien(y,x)->vivo == true){
+						if(Alien[y][x].vivo == true){
 
-							if(getMovAliens()->animacion == true ){
-								SSD1306_DrawBitmap(getAlien(y,x)->posicion_X, getAlien(y,x)->posicion_Y,InvaderTopGfx,8,8,1);
-								//getMovAliens()->animacion = false;
+							if(movimiento_Aliens.animacion == true ){
+								SSD1306_DrawBitmap(Alien[y][x].posicion_X, Alien[y][x].posicion_Y,InvaderTopGfx,8,8,1);
+								//movimiento_Aliens.animacion = false;
 							}
 							else{
-								SSD1306_DrawBitmap(getAlien(y,x)->posicion_X, getAlien(y,x)->posicion_Y,InvaderTopGfx2,8,8,1);
-								//getMovAliens()->animacion = true;
+								SSD1306_DrawBitmap(Alien[y][x].posicion_X, Alien[y][x].posicion_Y,InvaderTopGfx2,8,8,1);
+								//movimiento_Aliens.animacion = true;
 							}
 
 						}
 						break;
 					case 1:
-						if(getAlien(y,x)->vivo == true){
-							if(getMovAliens()->animacion == true ){
-								SSD1306_DrawBitmap(getAlien(y,x)->posicion_X, getAlien(y,x)->posicion_Y,InvaderMiddleGfx,16,8,1);
-								//getMovAliens()->animacion = false;
+						if(Alien[y][x].vivo == true){
+							if(movimiento_Aliens.animacion == true ){
+								SSD1306_DrawBitmap(Alien[y][x].posicion_X, Alien[y][x].posicion_Y,InvaderMiddleGfx,16,8,1);
+								//movimiento_Aliens.animacion = false;
 							}
 							else{
-								SSD1306_DrawBitmap(getAlien(y,x)->posicion_X, getAlien(y,x)->posicion_Y,InvaderMiddleGfx2,16,8,1);
-								//getMovAliens()->animacion = true;
+								SSD1306_DrawBitmap(Alien[y][x].posicion_X, Alien[y][x].posicion_Y,InvaderMiddleGfx2,16,8,1);
+								//movimiento_Aliens.animacion = true;
 							}
 						}
 						break;
 					default:
-						if(getAlien(y,x)->vivo == true){
-							if(getMovAliens()->animacion == true ){
-								SSD1306_DrawBitmap(getAlien(y,x)->posicion_X, getAlien(y,x)->posicion_Y,InvaderBottomGfx,16,8,1);
+						if(Alien[y][x].vivo == true){
+							if(movimiento_Aliens.animacion == true ){
+								SSD1306_DrawBitmap(Alien[y][x].posicion_X, Alien[y][x].posicion_Y,InvaderBottomGfx,16,8,1);
 							}
 							else{
-								SSD1306_DrawBitmap(getAlien(y,x)->posicion_X, getAlien(y,x)->posicion_Y,InvaderBottomGfx2,16,8,1);
+								SSD1306_DrawBitmap(Alien[y][x].posicion_X, Alien[y][x].posicion_Y,InvaderBottomGfx2,16,8,1);
 							}
 						}
 						break;
@@ -262,22 +247,22 @@ void plotAliens(){
 
 		}
 
-		uint8_t debug1, debug2;
+		//uint8_t debug1, debug2;
 
-		if(conteo_columna_derecha == 3){
-			getMovAliens()->alien_columna_derecha= getMovAliens()->alien_columna_derecha - 1;
+		if(conteo_columna_derecha == NUM_ALIEN_FILA){
+			movimiento_Aliens.alien_columna_derecha = movimiento_Aliens.alien_columna_derecha - 1;
 
 		}
 
-		if(conteo_columna_izquierda == 3){
-			getMovAliens()->alien_columna_izquierda= getMovAliens()->alien_columna_izquierda + 1;
+		if(conteo_columna_izquierda == NUM_ALIEN_FILA){
+			movimiento_Aliens.alien_columna_izquierda = movimiento_Aliens.alien_columna_izquierda + 1;
 		}
 
-		if(getMovAliens()->alien_columna_izquierda == getMovAliens()->alien_columna_derecha){
+		/*if(movimiento_Aliens.alien_columna_izquierda == movimiento_Aliens.alien_columna_derecha){
 
-			debug1 = getMovAliens()->alien_columna_derecha;
-			debug2 = getMovAliens()->alien_columna_izquierda;
-		}
+			debug1 = movimiento_Aliens.alien_columna_derecha;
+			debug2 = movimiento_Aliens.alien_columna_izquierda;
+		}*/
 
 
 }
@@ -286,35 +271,35 @@ void plotAliens(){
 void disparoInit(){
 
 	//Inicializacion del disparo del Player
-	getDisparo()->posicion_x = 0;
-	getDisparo()->posicion_y = POSICION_INICIAL_DISPARO;
-	getDisparo()->disparo = false;
-	getDisparo()->numero_disparos = 0;
+	Disparo.posicion_x = 0;
+	Disparo.posicion_y = POSICION_INICIAL_DISPARO;
+	Disparo.disparo = false;
+	Disparo.numero_disparos = 0;
 
 	//Inicializacion del Disparo de los Aliens
-	getDisparoAliens()->numero_disparos = 21;
+	Disparo_Aliens.numero_disparos = 21;
 }
 
 
 void disparar(){
 
 
-			if(getDisparo()->numero_disparos == 1){
-				getDisparo()->disparo = true;
-				getDisparo()->posicion_x = getPlayer()->posicion_X;
+			if(Disparo.numero_disparos == 1){
+				Disparo.disparo = true;
+				Disparo.posicion_x = Player.posicion_X;
 			}
 
 
-			if(getDisparo()->disparo == true){
-				SSD1306_DrawLine(getDisparo()->posicion_x + 4, getDisparo()->posicion_y, getDisparo()->posicion_x + 4, getDisparo()->posicion_y + 2, 1);
-				getDisparo()->posicion_y = getDisparo()->posicion_y - VELOCIDAD_DISPARO_PLAYER;
+			if(Disparo.disparo == true){
+				SSD1306_DrawLine(Disparo.posicion_x + 4, Disparo.posicion_y, Disparo.posicion_x + 4, Disparo.posicion_y + 2, 1);
+				Disparo.posicion_y = Disparo.posicion_y - VELOCIDAD_DISPARO_PLAYER;
 
 
-				if(getDisparo()->posicion_y <= 0){
+				if(Disparo.posicion_y <= 0){
 					//Se reinician los valores del disparo
-					getDisparo()->disparo = false;
-					getDisparo()->posicion_y = POSICION_INICIAL_DISPARO;
-					getDisparo()->numero_disparos = 0;
+					Disparo.disparo = false;
+					Disparo.posicion_y = POSICION_INICIAL_DISPARO;
+					Disparo.numero_disparos = 0;
 				}
 			}
 
@@ -339,33 +324,33 @@ void disparar(){
 
 				for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
 
-					if( (getDisparo()->posicion_x + 1 >= getAlien(y,x)->posicion_X) &  (getDisparo()->posicion_x + 1 <= (getAlien(y,x)->posicion_X + tamano_alien)) & ((getDisparo()->posicion_y) >= getAlien(y,x)->posicion_Y) & (getDisparo()->posicion_y <= getAlien(y,x)->posicion_Y + tamano_alien)){
+					if( (Disparo.posicion_x + 1 >= Alien[y][x].posicion_X) &  (Disparo.posicion_x + 1 <= (Alien[y][x].posicion_X + tamano_alien)) & ((Disparo.posicion_y) >= Alien[y][x].posicion_Y) & (Disparo.posicion_y <= Alien[y][x].posicion_Y + tamano_alien)){
 
-								if(getAlien(y,x)->vivo == true){
-									getAlien(y,x)->vivo = false;
-									getAlien(y,x)->explosion = true;
+								if(Alien[y][x].vivo == true){
+									Alien[y][x].vivo = false;
+									Alien[y][x].explosion = true;
 
 									//Se reinician los valores del disparo
-									getDisparo()->disparo = false;
-									getDisparo()->posicion_y = POSICION_INICIAL_DISPARO;
-									getDisparo()->numero_disparos = 0;
+									Disparo.disparo = false;
+									Disparo.posicion_y = POSICION_INICIAL_DISPARO;
+									Disparo.numero_disparos = 0;
 
 
 									//Conteo de la cantidad de aliens eliminados (esto para la funcion disparoAliens())
-									//getDisparoAliens()->numero_disparos se interpretará como aliens eliminados.
-									getDisparoAliens()->numero_disparos = getDisparoAliens()->numero_disparos - 1;
+									//Disparo_Aliens.numero_disparos se interpretará como aliens eliminados.
+									Disparo_Aliens.numero_disparos = Disparo_Aliens.numero_disparos - 1;
 
 
 									//Puntajes del Player
 									switch(y){
 									case 0:
-										getPlayer()->puntaje = (getPlayer()->puntaje) + (PUNTAJE_ALIEN_TOP*(getPlayer()->nivel));
+										Player.puntaje = (Player.puntaje) + (PUNTAJE_ALIEN_TOP+ (PUNTAJE_ADICIONAL*Player.nivel));
 										break;
 									case 1:
-										getPlayer()->puntaje = (getPlayer()->puntaje) + (PUNTAJE_ALIEN_MIDDLE*(getPlayer()->nivel));
+										Player.puntaje = (Player.puntaje) + (PUNTAJE_ALIEN_MIDDLE + (PUNTAJE_ADICIONAL*Player.nivel));
 										break;
 									case 2:
-										getPlayer()->puntaje = (getPlayer()->puntaje) + (PUNTAJE_ALIEN_BOTTOM*(getPlayer()->nivel));
+										Player.puntaje = (Player.puntaje) + (PUNTAJE_ALIEN_BOTTOM+ (PUNTAJE_ADICIONAL*Player.nivel));
 										break;
 
 									}
@@ -379,12 +364,12 @@ void disparar(){
 					//Se grafican las explosiones, como la pantalla se refresca muy rapido, las se utiliza una variable 'conteo_explosiones' para
 					//que se grafique la explosion por mas tiempo y cuando conteo_explosiones = 0 ahi se deja de graficar las explosiones.
 					//Tambien se definio una variable explosion, si es true se entra a este if y se decrementa conteo_explosiones.
-					if(getAlien(y,x)->explosion == true){
-						SSD1306_DrawBitmap(getAlien(y,x)->posicion_X, getAlien(y,x)->posicion_Y,explosion,16,8,1);
-						getAlien(y,x)->conteo_explosion = getAlien(y,x)->conteo_explosion - 1;
+					if(Alien[y][x].explosion == true){
+						SSD1306_DrawBitmap(Alien[y][x].posicion_X, Alien[y][x].posicion_Y,explosion,16,8,1);
+						Alien[y][x].conteo_explosion = Alien[y][x].conteo_explosion - 1;
 
-						if(getAlien(y,x)->conteo_explosion == 0){
-							getAlien(y,x)->explosion = false;
+						if(Alien[y][x].conteo_explosion == 0){
+							Alien[y][x].explosion = false;
 						}
 					}
 				}
@@ -395,26 +380,27 @@ void disparar(){
 void disparoAliens(){
 
 
-	if(getDisparoAliens()->numero_disparos != 0){	//Si no hay aliens vivos.
+	if(Disparo_Aliens.numero_disparos != 0){	//Si no hay aliens vivos.
 
-				if(getDisparoAliens()->disparo == true){
+				if(Disparo_Aliens.disparo == true){
 
-					getDisparoAliens()->posicion_y = getDisparoAliens()->posicion_y + dificultad.velocidad_disparo_aliens;
+					Disparo_Aliens.posicion_y = Disparo_Aliens.posicion_y + dificultad.velocidad_disparo_aliens;
 
 
-					if( (getDisparoAliens()->posicion_x + 1 >= getPlayer()->posicion_X) &  (getDisparoAliens()->posicion_x + 1 <= getPlayer()->posicion_X + 6) ){
-						getDisparoAliens()->disparo = false;
-						getPlayer()->vidas = getPlayer()->vidas - 1;
+					if( (Disparo_Aliens.posicion_x + 1 >= Player.posicion_X) &  (Disparo_Aliens.posicion_x + 1 <= Player.posicion_X + 6) & ((Disparo_Aliens.posicion_y) >= TOTAL_PIXELES_Y-TAMANO_NAVE_Y) & (Disparo.posicion_y <= TOTAL_PIXELES_Y)){
+
+						Disparo_Aliens.disparo = false;
+						Player.vidas = Player.vidas - 1;
 
 
 						//Si me quedo sin vidas, el player se elimina.
-						if(getPlayer()->vidas == 0){
-							getPlayer()->vivo = false;
+						if(Player.vidas == 0){
+							Player.vivo = false;
 						}
 					}
 
-					else if(getDisparoAliens()->posicion_y >= 60){
-						getDisparoAliens()->disparo = false;
+					else if(Disparo_Aliens.posicion_y >= 60){
+						Disparo_Aliens.disparo = false;
 					}
 
 				}
@@ -428,18 +414,18 @@ void disparoAliens(){
 						uint8_t fila = rand() % NUM_ALIEN_FILA;
 						uint8_t columna = rand() % NUM_ALIEN_COLUMNA;
 
-						if(getAlien(fila, columna)->vivo == true){
+						if(Alien[fila][columna].vivo == true){
 							flag = true;
-							getDisparoAliens()->disparo = true;
+							Disparo_Aliens.disparo = true;
 
-							getDisparoAliens()->posicion_x = getAlien(fila, columna)->posicion_X + (TAMANO_ALIEN/2);
-							getDisparoAliens()->posicion_y = getAlien(fila, columna)->posicion_Y + (TAMANO_ALIEN/2);
+							Disparo_Aliens.posicion_x = Alien[fila][columna].posicion_X + (TAMANO_ALIEN/2);
+							Disparo_Aliens.posicion_y = Alien[fila][columna].posicion_Y + (TAMANO_ALIEN/2);
 						}
 
 					}
 				}
 
-				SSD1306_DrawBitmap(getDisparoAliens()->posicion_x, getDisparoAliens()->posicion_y, AlienBombGfx, 2, 4, 1);
+				SSD1306_DrawBitmap(Disparo_Aliens.posicion_x, Disparo_Aliens.posicion_y, AlienBombGfx, 2, 4, 1);
 
 	}
 
@@ -448,10 +434,127 @@ void disparoAliens(){
 
 void plotBases(){
 
-	SSD1306_DrawBitmap(16, 45, BaseGfx, 16, 8, 1);
-	SSD1306_DrawBitmap(56, 45, BaseGfx, 16, 8, 1);
-	SSD1306_DrawBitmap(96, 45, BaseGfx, 16, 8, 1);
+	SSD1306_DrawBitmap(LIMITE_IZQ_X_BASE1, LIMITE_ABAJO_BASE, bases[0].buffer, 16, 8, 1);
+	SSD1306_DrawBitmap(LIMITE_IZQ_X_BASE2, LIMITE_ABAJO_BASE, bases[1].buffer, 16, 8, 1);
+	SSD1306_DrawBitmap(LIMITE_IZQ_X_BASE3, LIMITE_ABAJO_BASE, bases[2].buffer, 16, 8, 1);
 
+	//Colisiones
+
+	uint16_t resultado_or[3];
+
+
+	for(uint8_t i=0;i<3;i++){
+		for(uint8_t j=0; j<16;j++){
+
+
+			if(j % 2 == 0){	//Me fijo si una columna entera del lado izquierdo esta destruido.
+
+				resultado_or[i] = (resultado_or[i] | (bases[i].buffer[j] <<8)) ;
+			}
+			else{
+				resultado_or[i] = resultado_or[i] | (bases[i].buffer[j]);
+			}
+		}
+	}
+
+
+
+	const uint8_t limites_izquierda[] = {LIMITE_IZQ_X_BASE1, LIMITE_IZQ_X_BASE2, LIMITE_IZQ_X_BASE3};
+	const uint8_t limites_derecha[] = {LIMITE_DER_X_BASE1, LIMITE_DER_X_BASE2, LIMITE_DER_X_BASE3};
+
+	if((Disparo.posicion_y >= LIMITE_ARRIBA_BASE) &  (Disparo.posicion_y < LIMITE_ABAJO_BASE)){
+
+		// Iterar sobre las bases
+		for (int i = 0; i < 3; ++i) {
+			// Verificar si el disparo está dentro de la base actual
+			if ((Disparo.posicion_x + POS_OFF_DISPARO_PLAYER) >= limites_izquierda[i] &&
+				(Disparo.posicion_x + POS_OFF_DISPARO_PLAYER) <= limites_derecha[i]) {
+
+				// Calcular el desplazamiento y el resultado correspondiente
+				uint8_t desplazamiento = (Disparo.posicion_x + POS_OFF_DISPARO_PLAYER) - limites_izquierda[i];
+				uint16_t resultado = 1 << (OFFSET_DESPLAZAMIENTO - desplazamiento);
+
+				// Verificar si el resultado coincide con algún resultado OR almacenado
+				if ((resultado & resultado_or[i]) != 0) {
+					// Se reinician los valores del disparo
+					Disparo.disparo = false;
+					Disparo.posicion_y = POSICION_INICIAL_DISPARO;
+					Disparo.numero_disparos = 0;
+
+
+					//Generar la destruccion de la base
+					uint8_t desplazamiento_horiz = (rand() % RANDOM_MAX_2) + 1;
+
+					for(uint8_t j=0;j<desplazamiento_horiz; j++){
+
+						resultado = resultado + (1 << (OFFSET_DESPLAZAMIENTO + j - desplazamiento));
+						resultado = resultado + (1 << (OFFSET_DESPLAZAMIENTO - j - desplazamiento));
+					}
+
+					uint16_t bases_16bits;
+					uint8_t k = 0;
+					uint8_t conteo = 0;
+
+					uint16_t debug1, debug2;
+
+					for(uint8_t j=0; j<16;j++){
+
+						if(j % 2 != 0){
+
+							bases_16bits = (bases[i].buffer[15-j]<<8) + (bases[i].buffer[15-j+1] & 0xff);
+							k++;
+
+							if( (bases_16bits & resultado) != 0){
+
+								debug1 = ~(resultado >> 8);
+								debug2 = ~resultado;
+								bases[i].buffer[15-j] = bases[i].buffer[15-j] & ~(resultado>>8);
+								bases[i].buffer[15-j+1] = bases[i].buffer[15-j+1] & ~(resultado);
+								conteo++;
+							}
+							if(conteo == 3){
+								break;
+							}
+						}
+
+					}
+
+
+
+
+				}
+
+				// Terminar la iteración una vez que se encuentra una base válida
+				break;
+			}
+		}
+
+	}
+
+
+
+
+
+
+}
+
+void BasesInit(){
+
+	for(uint8_t i=0;i<3;i++){
+		for(uint8_t j=0; j<16; j++){
+
+			bases[i].buffer[j] = BaseGfx[j];
+		}
+	}
+
+}
+
+void Dificultad_Init(){
+
+	//Se inicializan las dificultades
+	dificultad.velocidad_horizontal = 8;
+	dificultad.velocidad_bajada = 1;
+	dificultad.velocidad_disparo_aliens = 3;
 }
 
 
@@ -459,15 +562,15 @@ void AumentoNivel(){
 
 	//Incremento de la dificultad (Aumento de la velocidad de los aliens y la velocidad de disparo)
 	//Se aumenta la dificultad.
-	getDificultad()->velocidad_horizontal = 6;
-	getDificultad()->velocidad_bajada = 2;
-	getDificultad()->velocidad_disparo_aliens = 3;
+	dificultad.velocidad_horizontal = 6;
+	dificultad.velocidad_bajada = 2;
+	dificultad.velocidad_disparo_aliens = 3;
 
 
 	//Se Reinicializa el Player.
-	getPlayer()->posicion_X = 64;
-	getPlayer()->vivo = true;
-	getPlayer()->nivel = getPlayer()->nivel + 1;
+	Player.posicion_X = 64;
+	Player.vivo = true;
+	Player.nivel = Player.nivel + 1;
 
 }
 

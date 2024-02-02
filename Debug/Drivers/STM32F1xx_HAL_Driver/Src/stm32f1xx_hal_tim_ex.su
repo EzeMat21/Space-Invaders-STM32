@@ -30,7 +30,7 @@
 ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c:1803:19:HAL_TIMEx_ConfigCommutEvent	4	static
 ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c:1859:19:HAL_TIMEx_ConfigCommutEvent_IT	4	static
 ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c:1916:19:HAL_TIMEx_ConfigCommutEvent_DMA	4	static
-../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c:1965:19:HAL_TIMEx_MasterConfigSynchronization	8	static
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c:1965:19:HAL_TIMEx_MasterConfigSynchronization	4	static
 ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c:2026:19:HAL_TIMEx_ConfigBreakDeadTime	0	static
 ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c:2073:19:HAL_TIMEx_RemapConfig	0	static
 ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c:2107:13:HAL_TIMEx_CommutCallback	0	static

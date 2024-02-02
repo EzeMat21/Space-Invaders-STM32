@@ -56,15 +56,15 @@ typedef struct{
 musica_t musica;
 
 volatile uint8_t *puntero_musica;
-volatile uint8_t *puntero_musica_final_f622 = tono_622hz + TAMANO_BUFF_TONO_622;
-volatile uint8_t *puntero_musica_final_f587 = tono_587hz + TAMANO_BUFF_TONO_587;
-volatile uint8_t *puntero_musica_final_f554 = tono_554hz + TAMANO_BUFF_TONO_554;
-volatile uint8_t *puntero_musica_final_tonos = tonos_variables + TAMANO_BUFF_TONOS_VARIABLES;
-volatile uint8_t *puntero_final_disparo = audio_disparo + TAMANO_BUFF_AUDIO_DISPARO;
-volatile uint8_t *puntero_final_explosion = audio_explosion + TAMANO_BUFF_AUDIO_EXPLOSION;
+uint8_t *puntero_musica_final_f622 = tono_622hz + TAMANO_BUFF_TONO_622;
+uint8_t *puntero_musica_final_f587 = tono_587hz + TAMANO_BUFF_TONO_587;
+uint8_t *puntero_musica_final_f554 = tono_554hz + TAMANO_BUFF_TONO_554;
+uint8_t *puntero_musica_final_tonos = tonos_variables + TAMANO_BUFF_TONOS_VARIABLES;
+uint8_t *puntero_final_disparo = audio_disparo + TAMANO_BUFF_AUDIO_DISPARO;
+uint8_t *puntero_final_explosion = audio_explosion + TAMANO_BUFF_AUDIO_EXPLOSION;
 
-tonos_t tonos;
-uint8_t conteo_musica;
+volatile tonos_t tonos;
+volatile uint8_t conteo_musica;
 
 
 /* USER CODE END PD */

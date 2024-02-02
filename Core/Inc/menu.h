@@ -44,9 +44,6 @@ typedef struct{
 	cursor_t GuardarNombre;
 	menuJuego_t juego;
 
-	uint8_t musica_gameover;
-
-
 }menu_t;
 
 //Los diferentes menu en los que accede menuActual.
@@ -86,7 +83,6 @@ enum{
 
 
 //Funciones
-menu_t *getMenu();
 void menuInit();
 void menuReset();
 void GuardarNombreReset();

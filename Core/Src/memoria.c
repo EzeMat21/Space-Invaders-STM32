@@ -128,19 +128,19 @@ void memoriaInit(){
 				switch(i){
 
 				case 7:
-					getPuntajes(0)->puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					Puntajes[0].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
 				case 15:
-					getPuntajes(1)->puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					Puntajes[1].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
 				case 23:
-					getPuntajes(2)->puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					Puntajes[2].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
 				case 31:
-					getPuntajes(3)->puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					Puntajes[3].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
 				case 39:
-					getPuntajes(4)->puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					Puntajes[4].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
 
 				}
@@ -158,19 +158,19 @@ void memoriaInit(){
 					if(buff_nombre[j] == '\0'){
 
 						if((i>=0 && i<6)){
-							strcpy(getPuntajes(0)->nombre, buff_nombre);
+							strcpy(Puntajes[0].nombre, buff_nombre);
 						}
 						else if((i>=8 && i<14)){
-							strcpy(getPuntajes(1)->nombre, buff_nombre);
+							strcpy(Puntajes[1].nombre, buff_nombre);
 						}
 						else if((i>=16 && i<22)){
-							strcpy(getPuntajes(2)->nombre, buff_nombre);
+							strcpy(Puntajes[2].nombre, buff_nombre);
 						}
 						else if((i>=24 && i<30)){
-							strcpy(getPuntajes(3)->nombre, buff_nombre);
+							strcpy(Puntajes[3].nombre, buff_nombre);
 						}
 						else if((i>=32 && i<38)){
-							strcpy(getPuntajes(4)->nombre, buff_nombre);
+							strcpy(Puntajes[4].nombre, buff_nombre);
 						}
 
 						j = 0;
@@ -206,27 +206,27 @@ void writeNuevosPuntajes(uint8_t permutaciones){
 
 		if(i>=0 && i<6){
 
-			buff_nuevosPuntajes[i] = getPuntajes(0)->nombre[k];
+			buff_nuevosPuntajes[i] = Puntajes[0].nombre[k];
 			k++;
 		}
 		else if(i>=8 && i<14){
 
-			buff_nuevosPuntajes[i] = getPuntajes(1)->nombre[k];
+			buff_nuevosPuntajes[i] = Puntajes[1].nombre[k];
 			k++;
 		}
 		else if(i>=16 && i<22){
 
-			buff_nuevosPuntajes[i] = getPuntajes(2)->nombre[k];
+			buff_nuevosPuntajes[i] = Puntajes[2].nombre[k];
 			k++;
 		}
 		else if(i>=24 && i<30){
 
-			buff_nuevosPuntajes[i] = getPuntajes(3)->nombre[k];
+			buff_nuevosPuntajes[i] = Puntajes[3].nombre[k];
 			k++;
 		}
 		else if(i>=32 && i<38){
 
-			buff_nuevosPuntajes[i] = getPuntajes(4)->nombre[k];
+			buff_nuevosPuntajes[i] = Puntajes[4].nombre[k];
 			k++;
 		}
 
@@ -237,39 +237,39 @@ void writeNuevosPuntajes(uint8_t permutaciones){
 
 
 		case 6:
-			buff_nuevosPuntajes[i] = getPuntajes(0)->puntaje >>8;
+			buff_nuevosPuntajes[i] = Puntajes[0].puntaje >>8;
 			k = 0;
 			break;
 		case 7:
-			buff_nuevosPuntajes[i] = getPuntajes(0)->puntaje & 0xFF;
+			buff_nuevosPuntajes[i] = Puntajes[0].puntaje & 0xFF;
 			break;
 		case 14:
-			buff_nuevosPuntajes[i] = getPuntajes(1)->puntaje >>8;
+			buff_nuevosPuntajes[i] = Puntajes[1].puntaje >>8;
 			k = 0;
 			break;
 		case 15:
-			buff_nuevosPuntajes[i] = getPuntajes(1)->puntaje & 0xFF;
+			buff_nuevosPuntajes[i] = Puntajes[1].puntaje & 0xFF;
 			break;
 		case 22:
-			buff_nuevosPuntajes[i] = getPuntajes(2)->puntaje >>8;
+			buff_nuevosPuntajes[i] = Puntajes[2].puntaje >>8;
 			k = 0;
 			break;
 		case 23:
-			buff_nuevosPuntajes[i] = getPuntajes(2)->puntaje & 0xFF;
+			buff_nuevosPuntajes[i] = Puntajes[2].puntaje & 0xFF;
 			break;
 		case 30:
-			buff_nuevosPuntajes[i] = getPuntajes(3)->puntaje >>8;
+			buff_nuevosPuntajes[i] = Puntajes[3].puntaje >>8;
 			k = 0;
 			break;
 		case 31:
-			buff_nuevosPuntajes[i] = getPuntajes(3)->puntaje & 0xFF;
+			buff_nuevosPuntajes[i] = Puntajes[3].puntaje & 0xFF;
 			break;
 		case 38:
-			buff_nuevosPuntajes[i] = getPuntajes(4)->puntaje >>8;
+			buff_nuevosPuntajes[i] = Puntajes[4].puntaje >>8;
 			k = 0;
 			break;
 		case 39:
-			buff_nuevosPuntajes[i] = getPuntajes(4)->puntaje && 0xFF;
+			buff_nuevosPuntajes[i] = Puntajes[4].puntaje && 0xFF;
 			break;
 
 		}
@@ -334,8 +334,8 @@ uint8_t Ordenamiento_Puntajes(){
 	//Copio los nombres y los puntajes porque voy a reescribir getPuntajes()
 	for(uint8_t i=0;i<5;i++){
 
-		vector[i] = getPuntajes(i)->puntaje;
-		strcpy(buff_nombre[i], getPuntajes(i)->nombre);
+		vector[i] = Puntajes[i].puntaje;
+		strcpy(buff_nombre[i], Puntajes[i].nombre);
 
 	}
 
@@ -373,11 +373,11 @@ uint8_t Ordenamiento_Puntajes(){
 			uint8_t j=0;
 			do{
 
-				if(getPuntajes(j)->puntaje == vector[k]){
+				if(Puntajes[j].puntaje == vector[k]){
 
-					strcpy(buff_aux, getPuntajes(k)->nombre);
-					strcpy(getPuntajes(k)->nombre, getPuntajes(j)->nombre);
-					strcpy(getPuntajes(j)->nombre, buff_aux);
+					strcpy(buff_aux, Puntajes[k].nombre);
+					strcpy(Puntajes[k].nombre, Puntajes[j].nombre);
+					strcpy(Puntajes[j].nombre, buff_aux);
 
 					//strcpy(buff_retorno[j], buff_nombre[k]);
 					//strcpy(getPuntajes(k)->nombre, getPuntajes(j)->nombre);
@@ -386,8 +386,8 @@ uint8_t Ordenamiento_Puntajes(){
 					//getPuntajes(j)->puntaje = getPuntajes(k)->puntaje;
 					//getPuntajes(k)->puntaje = vector[k];
 
-					getPuntajes(j)->puntaje = getPuntajes(k)->puntaje;
-					getPuntajes(k)->puntaje = vector[k];
+					Puntajes[j].puntaje = Puntajes[k].puntaje;
+					Puntajes[k].puntaje = vector[k];
 					finalizado = false;
 				}
 				j++;
