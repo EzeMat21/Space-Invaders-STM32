@@ -161,17 +161,6 @@ static const unsigned char BaseGfx [] = {
 		0b11100000,0b00000111
 };
 
-/*static const unsigned char BaseGfx [] = {
-		0b00000001,0b11111000,
-		0b01100001,0b11111110,
-		0b11100001,0b11111111,
-		0b11100001,0b11111111,
-		0b11100001,0b11111111,
-		0b11100000,0b00011111,
-		0b11100000,0b00000111,
-		0b11100000,0b00000111
-};*/
-
 static const unsigned char game_over_figura[] = {
 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

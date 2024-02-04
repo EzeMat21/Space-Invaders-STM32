@@ -11,9 +11,7 @@
 extern osEventFlagsId_t notificationFlag;
 extern osEventFlagsId_t notificationFlag2;
 
-extern osSemaphoreId_t mySem01Handle;
 extern osMutexId_t myMutexPuntajeHandle;
-
 extern osMessageQueueId_t queueSonidoMenuHandle;
 
 extern TIM_HandleTypeDef htim2;
@@ -111,18 +109,13 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 		uint8_t numero_aliens = getDisparoAliens().numero_disparos;
 
-
-		//Pruebas
-		//SSD1306_DrawBitmap(0, 0, AlienBombGfx, 2, 4, 1);
-		//SSD1306_DrawBitmap(0, 4, AlienBombGfx, 2, 4, 1);
-
-
 		plotBases();
 
 		//Se grafican el player, aliens y disparo.
 		plotPlayer(x);
 		plotAliens();
 		disparoAliens();
+
 
 
 		TickType_t Tiempo_Actual = xTaskGetTickCount();
@@ -229,15 +222,13 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		itoa(getPlayer().vidas, &cantidad_vidas,10);
 		SSD1306_Puts(&cantidad_vidas, &Font_7x10, 1);
 
-
-		//Se REinicializan las posiciones iniciales del player y de los aliens.
-		AumentoNivel();		//Aqui se reinicializa el player y se aumenta la dificultad del nivel.
-		InvaderInit();
-		disparoInit();
-		BasesInit();
-
 		if(y == arriba){
 
+			//Se REinicializan las posiciones iniciales del player y de los aliens.
+			AumentoNivel();		//Aqui se reinicializa el player y se aumenta la dificultad del nivel.
+			InvaderInit();
+			disparoInit();
+			BasesInit();
 			menu.menuActual = juego;
 
 		}
@@ -307,10 +298,8 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 		uint8_t posicion_x;
 
+		//Recuadro del nombre
 		SSD1306_DrawRectangle(30, 0, 60, 15, 1);
-		//SSD1306_GotoXY(43, 5);
-		//SSD1306_Puts("capaz", &Font_7x10, 1);
-
 
 			for(uint8_t i=0;i<10;i++){
 
@@ -668,6 +657,7 @@ void menuReset(){
 	playerInit();
 	InvaderInit();
 	disparoInit();
+	BasesInit();
 
 	//Se reinician las dificultades al nivel 1
 	Dificultad_Init();

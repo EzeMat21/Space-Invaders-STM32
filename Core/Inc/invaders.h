@@ -20,7 +20,7 @@
 
 typedef struct{
 
-	uint8_t posicion_X;
+	uint16_t posicion_X;
 	uint8_t vivo;
 	uint8_t vidas;
 	uint16_t puntaje;
@@ -33,19 +33,28 @@ typedef struct{
 //---------------------------------------------------------------Aliens-------------------------------------------------------
 
 
+#define NUM_ALIENS_PARA_AUMENTO_VELOCIDAD 3
+#define AUMENTO_POSICION_PIXELES_2 2
+#define AUMENTO_POSICION_PIXELES_4 4
+#define AUMENTO_POSICION_PIXELES_6 6
+
 #define TAMANO_NAVE_Y 8
 #define TOTAL_PIXELES_Y 64
+
+#define LIMITE_PANTALLA_IZQ  1
+#define LIMITE_PANTALLA_DER  127
 
 
 #define NUM_ALIEN_COLUMNA 7
 #define NUM_ALIEN_FILA 3
 #define ESPACIO_ALIENS 1
 
-#define TAMANO_ALIEN_TOP 8
-#define TAMANO_ALIEN_MIDDLE 11
-#define TAMANO_ALIEN_BOTTOM 12
+#define TAMANO_ALIEN_TOP_ANCHURA 8
+#define TAMANO_ALIEN_MIDDLE_ANCHURA 11
+#define TAMANO_ALIEN_BOTTOM_ANCHURA 12
+#define TAMANO_ALIEN_ALTURA 8
 
-
+#define TAMANO_PLAYER_ANCHURA 6
 
 #define OFFSET_INICIO 11
 #define TAMANO_ALIEN 8
@@ -53,15 +62,14 @@ typedef struct{
 #define ESPACIO_ENTRE_FILAS 3
 
 
-//Puntajes por cada aline
+//Puntajes por cada aliens
 #define PUNTAJE_ALIEN_TOP 30
 #define PUNTAJE_ALIEN_MIDDLE 20
 #define PUNTAJE_ALIEN_BOTTOM 10
 
 #define PUNTAJE_ADICIONAL 5
 
-
-//Defines para la base
+//-------------------------------------------------------------- Bases ----------------------------------------------------------------
 
 #define POS_OFF_DISPARO_PLAYER 4
 #define LIMITE_IZQ_X_BASE1 16
@@ -74,8 +82,10 @@ typedef struct{
 #define LIMITE_ABAJO_BASE 45
 
 #define OFFSET_DESPLAZAMIENTO 15
-#define RANDOM_MAX_2 2
+#define RANDOM_MAX_3 3
+#define DESPLAZAMIENTO_MINIMO 2
 
+#define DESTRUCCION_MAXIMA_VERTICAL 2
 
 
 typedef struct{
@@ -95,6 +105,8 @@ typedef struct{
 	uint8_t velocidad_bajada;
 	uint8_t velocidad_disparo_aliens;
 	uint8_t tiempo_entre_disparos;
+
+	uint8_t aumento_posicion_pixeles;
 
 }dificultad_t;
 
@@ -137,20 +149,6 @@ typedef struct{
 
 }disparo_t;
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------
-//Bases
-
-typedef struct{
-
-	uint8_t buffer[16];
-	uint8_t lim_der;
-	uint8_t lim_izq;
-	uint8_t lim_arriba;
-	uint8_t lim_abajo;
-
-}base_t;
-
-
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -175,12 +173,14 @@ void disparoInit();
 void disparar();
 
 //Dificultades
-//dificultad_t *getDificultad();
 void AumentoNivel();
 void Dificultad_Init();
+void AumentoVelocidadAliens();
+
 
 //Bases defensivas
 void plotBases();
 void BasesInit();
+void BasesProcesarDisparo(disparo_t *disparo, uint8_t condicion);
 
 #endif /* INC_INVADERS_H_ */

@@ -107,8 +107,8 @@ void memoriaInit(){
 		uint8_t permiso = true;
 		uint8_t i=0;
 
-		uint8_t puntaje_lsb;
-		uint8_t puntaje_msb;
+		uint8_t puntaje_lsb = 0;
+		uint8_t puntaje_msb = 0;
 
 		uint8_t buffer[TAMANO_TOTAL_PUNTAJES];
 
@@ -269,13 +269,12 @@ void writeNuevosPuntajes(uint8_t permutaciones){
 			k = 0;
 			break;
 		case 39:
-			buff_nuevosPuntajes[i] = Puntajes[4].puntaje && 0xFF;
+			buff_nuevosPuntajes[i] = Puntajes[4].puntaje & 0xFF;
 			break;
 
 		}
 
 	}
-
 
 
 	//Ahora sí se realiza la escritura.
@@ -379,13 +378,6 @@ uint8_t Ordenamiento_Puntajes(){
 					strcpy(Puntajes[k].nombre, Puntajes[j].nombre);
 					strcpy(Puntajes[j].nombre, buff_aux);
 
-					//strcpy(buff_retorno[j], buff_nombre[k]);
-					//strcpy(getPuntajes(k)->nombre, getPuntajes(j)->nombre);
-					//strcpy(getPuntajes(j)->nombre, buff_nombre[k]);
-
-					//getPuntajes(j)->puntaje = getPuntajes(k)->puntaje;
-					//getPuntajes(k)->puntaje = vector[k];
-
 					Puntajes[j].puntaje = Puntajes[k].puntaje;
 					Puntajes[k].puntaje = vector[k];
 					finalizado = false;
@@ -448,8 +440,6 @@ void Write_PuntajesEjemplos(){
 		j++;
 
 	}
-
-
 
 }
 

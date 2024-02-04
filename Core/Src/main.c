@@ -129,11 +129,6 @@ osMutexId_t myMutexPuntajeHandle;
 const osMutexAttr_t myMutexPuntaje_attributes = {
   .name = "myMutexPuntaje"
 };
-/* Definitions for mySem01 */
-osSemaphoreId_t mySem01Handle;
-const osSemaphoreAttr_t mySem01_attributes = {
-  .name = "mySem01"
-};
 /* USER CODE BEGIN PV */
 
 //Notificacion entre MemoriaTask y PantallaTask
@@ -213,10 +208,6 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
-
-  /* Create the semaphores(s) */
-  /* creation of mySem01 */
-  mySem01Handle = osSemaphoreNew(1, 1, &mySem01_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -785,7 +776,6 @@ void entryMemoria(void *argument)
 
 	//vTaskSetApplicationTaskTag( NULL, ( void * ) 2 );
 
-	uint8_t permutaciones;
 
 	//Se leen los datos desde la memoria.
 	memoriaInit();
@@ -800,8 +790,9 @@ void entryMemoria(void *argument)
 	      if (flags == NOTIFICATION_VALUE)
 	      {
 
-				permutaciones = Ordenamiento_Puntajes();
-				//writeNuevosPuntajes(permutaciones);
+	    	  uint8_t permutaciones = Ordenamiento_Puntajes();
+	    	  writeNuevosPuntajes(permutaciones);
+
 
 	    	  //Envio la notificacion 2 para que la tarea PantallaTask pueda pasar del menu guardado_nombre al menu de puntajes una vez que los puntajes ya se encuentran ordenadas y guardadas, ya que sin esta segunda sincronizacion, puede pasarse al menu puntajes sin que estos se encuentren ordenados. El ordenado se realiza en esta tarea MemoriaTask ya que las escrituras de puntajes se realizan solo en esta tarea.
 	    	  osEventFlagsSet(notificationFlag2, NOTIFICATION_VALUE2);
