@@ -398,8 +398,8 @@ void Write_PuntajesEjemplos(){
 	uint16_t puntaje[5];
 	char buffer[5][6];
 
-	strcpy(buffer[0], "lindo");
-	puntaje[0] = 2450;
+	strcpy(buffer[0], "messi");
+	puntaje[0] = 30000;
 
 	strcpy(buffer[1], "boris");
 	puntaje[1] = 12000;
@@ -407,7 +407,7 @@ void Write_PuntajesEjemplos(){
 	strcpy(buffer[2], "eze");
 	puntaje[2] = 9999;
 
-	strcpy(buffer[3], "josep");
+	strcpy(buffer[3], "kafka");
 	puntaje[3] = 1000;
 
 	strcpy(buffer[4], "juan");

@@ -2,9 +2,9 @@
 ../Core/Src/main.c:659:6:entryJoystick	7
 ../Core/Src/main.c:734:6:entryPantalla	2
 ../Core/Src/main.c:773:6:entryMemoria	2
-../Core/Src/main.c:812:6:entrySonido	5
-../Core/Src/main.c:868:6:HAL_TIM_PeriodElapsedCallback	20
-../Core/Src/main.c:971:6:Error_Handler	1
+../Core/Src/main.c:815:6:entrySonido	5
+../Core/Src/main.c:871:6:HAL_TIM_PeriodElapsedCallback	20
+../Core/Src/main.c:974:6:Error_Handler	1
 ../Core/Src/main.c:324:13:MX_ADC1_Init	1
 ../Core/Src/main.c:418:13:MX_I2C1_Init	1
 ../Core/Src/main.c:452:13:MX_SPI1_Init	1

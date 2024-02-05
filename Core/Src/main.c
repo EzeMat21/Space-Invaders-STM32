@@ -776,9 +776,11 @@ void entryMemoria(void *argument)
 
 	//vTaskSetApplicationTaskTag( NULL, ( void * ) 2 );
 
+	//Write_PuntajesEjemplos();
 
 	//Se leen los datos desde la memoria.
 	memoriaInit();
+
 
   /* Infinite loop */
   for(;;)
@@ -791,6 +793,7 @@ void entryMemoria(void *argument)
 	      {
 
 	    	  uint8_t permutaciones = Ordenamiento_Puntajes();
+
 	    	  writeNuevosPuntajes(permutaciones);
 
 

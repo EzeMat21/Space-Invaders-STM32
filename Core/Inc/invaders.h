@@ -15,7 +15,6 @@
 #include "figuras.h"
 
 
-
 //---------------------------------------------------------------Player-------------------------------------------------------
 
 typedef struct{
@@ -105,7 +104,6 @@ typedef struct{
 	uint8_t velocidad_bajada;
 	uint8_t velocidad_disparo_aliens;
 	uint8_t tiempo_entre_disparos;
-
 	uint8_t aumento_posicion_pixeles;
 
 }dificultad_t;
@@ -128,6 +126,7 @@ typedef struct{
 
 	uint8_t alien_columna_izquierda;
 	uint8_t alien_columna_derecha;
+	uint8_t cantidad_aliens_vivos;
 
 
 }movimiento_aliens_t;
@@ -144,8 +143,6 @@ typedef struct{
 	uint8_t posicion_x;
 	int8_t posicion_y;
 	uint8_t disparo;
-	uint8_t numero_disparos;
-
 
 }disparo_t;
 
@@ -164,13 +161,14 @@ void plotPlayer(uint8_t direccion);
 //Funciones Aliens
 void InvaderInit();
 void plotAliens();
-disparo_t getDisparoAliens();
+uint8_t getCantidad_Aliens_Vivos();
 void disparoAliens();
 
 //Funciones disparo Player
-disparo_t *getDisparo();
+uint8_t getDisparo();
 void disparoInit();
 void disparar();
+void disparoTrue();
 
 //Dificultades
 void AumentoNivel();

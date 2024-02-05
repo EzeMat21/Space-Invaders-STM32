@@ -107,15 +107,14 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 	case juego:
 
-		uint8_t numero_aliens = getDisparoAliens().numero_disparos;
+		uint8_t numero_aliens = getCantidad_Aliens_Vivos();
 
 		plotBases();
 
 		//Se grafican el player, aliens y disparo.
-		plotPlayer(x);
+		//plotPlayer(x);
 		plotAliens();
 		disparoAliens();
-
 
 
 		TickType_t Tiempo_Actual = xTaskGetTickCount();
@@ -149,31 +148,27 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		}
 
 
-		//Prender led si se apretó el boton
-		if(boton == true && getPlayer().vivo == true ){
+		//Si se apretó el boton, si el jugador esta vivo y no existe ningun disparo existente.
+		if( (boton == true) && (getPlayer().vivo == true) && (getDisparo() == false)){
 
-				getDisparo()->numero_disparos = getDisparo()->numero_disparos + 1;
+			//Disparo se hace verdadero.
+			disparoTrue();
 
+			//Se genera el sonido del disparo.
+			musica_t musica_ = disparo_;
 
-				if(getDisparo()->numero_disparos == 1){
+			osStatus_t res = osMessageQueuePut(queueSonidoMenuHandle, &musica_, 0, 0);
+			if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
-					//Se genera el sonido del disparo.
-
-					musica_t musica_ = disparo_;
-
-					osStatus_t res = osMessageQueuePut(queueSonidoMenuHandle, &musica_, 0, 0);
-					if(res != osOK) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-
-
-				}
 
 		}
 
+		plotPlayer(x);
 		disparar();
 
 
 		//Se genera el sonido de la explosion de los aliens.
-		if(getDisparoAliens().numero_disparos != numero_aliens && getPlayer().vivo == true){
+		if(getCantidad_Aliens_Vivos() != numero_aliens && getPlayer().vivo == true){
 
 			musica_t musica_ = explosion_;
 
@@ -184,7 +179,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 
 		//Se ha completado el nivel, paso al menu 'progresion_niveles'.
-		if( getDisparoAliens().numero_disparos == 0){
+		if(getCantidad_Aliens_Vivos() == 0){
 
 			menu.menuActual = progresion_niveles;
 		}

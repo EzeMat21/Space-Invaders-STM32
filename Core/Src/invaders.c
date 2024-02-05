@@ -40,12 +40,12 @@ player_t getPlayer(){
 	return Player;
 }
 
-disparo_t *getDisparo(){
-	return &Disparo;
+uint8_t getDisparo(){
+	return Disparo.disparo;
 }
 
-disparo_t getDisparoAliens(){
-	return Disparo_Aliens;
+uint8_t getCantidad_Aliens_Vivos(){
+	return movimiento_Aliens.cantidad_aliens_vivos;
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
@@ -111,6 +111,9 @@ void InvaderInit(){
 	movimiento_Aliens.alien_columna_derecha = NUM_ALIEN_COLUMNA - 1;
 	movimiento_Aliens.alien_columna_izquierda = 0;
 
+	//Inicializacion cantidad aliens vivos.
+	movimiento_Aliens.cantidad_aliens_vivos = 21;
+
 	for(uint8_t y=0; y<NUM_ALIEN_FILA ;y++){
 		for(uint8_t x=0; x<NUM_ALIEN_COLUMNA; x++){
 			Alien[y][x].posicion_X  =  OFFSET_INICIO + x*(TAMANO_ALIEN+ ESPACIO_ENTRE_COLUMNAS);
@@ -125,6 +128,7 @@ void InvaderInit(){
 	//Reinicio velocidad horizontal de los aliens
 	dificultad.velocidad_horizontal = 8;
 	dificultad.aumento_posicion_pixeles = AUMENTO_POSICION_PIXELES_2;
+
 
 }
 
@@ -252,21 +256,11 @@ void disparoInit(){
 	Disparo.posicion_x = 0;
 	Disparo.posicion_y = POSICION_INICIAL_DISPARO;
 	Disparo.disparo = false;
-	Disparo.numero_disparos = 0;
 
-	//Inicializacion del Disparo de los Aliens
-	Disparo_Aliens.numero_disparos = 21;
 }
 
 
 void disparar(){
-
-
-			if(Disparo.numero_disparos == 1){
-				Disparo.disparo = true;
-				Disparo.posicion_x = Player.posicion_X;
-			}
-
 
 			if(Disparo.disparo == true){
 				SSD1306_DrawLine(Disparo.posicion_x + 4, Disparo.posicion_y, Disparo.posicion_x + 4, Disparo.posicion_y + 2, 1);
@@ -277,7 +271,6 @@ void disparar(){
 					//Se reinician los valores del disparo
 					Disparo.disparo = false;
 					Disparo.posicion_y = POSICION_INICIAL_DISPARO;
-					Disparo.numero_disparos = 0;
 				}
 			}
 
@@ -312,12 +305,11 @@ void disparar(){
 									//Se reinician los valores del disparo
 									Disparo.disparo = false;
 									Disparo.posicion_y = POSICION_INICIAL_DISPARO;
-									Disparo.numero_disparos = 0;
+									//Disparo.numero_disparos = 0;
 
 
-									//Conteo de la cantidad de aliens eliminados (esto para la funcion disparoAliens())
-									//Disparo_Aliens.numero_disparos se interpretará como aliens eliminados.
-									Disparo_Aliens.numero_disparos -= 1;
+									//Conteo de la cantidad de aliens eliminados
+									movimiento_Aliens.cantidad_aliens_vivos -=1;
 
 
 									//Puntajes del Player
@@ -362,7 +354,7 @@ void disparar(){
 void disparoAliens(){
 
 
-	if(Disparo_Aliens.numero_disparos != 0){	//Si no hay aliens vivos.
+	if(movimiento_Aliens.cantidad_aliens_vivos != 0){	//Si no hay aliens vivos.
 
 				if(Disparo_Aliens.disparo == true){
 
@@ -468,7 +460,7 @@ void BasesProcesarDisparo(disparo_t *disparo, uint8_t condicion){
 
 	            	if (condicion != 0) {
 	                    disparo->posicion_y = POSICION_INICIAL_DISPARO;
-	                    disparo->numero_disparos = 0;
+	                    //disparo->numero_disparos = 0;
 	                    jmin = 1;
 	                }
 
@@ -560,7 +552,7 @@ void AumentoVelocidadAliens(){
 
 
 	//Cuando queden menos de 3 aliens (por ejemplo) que los aliens comiencen a moverse mas rapido.
-	switch(Disparo_Aliens.numero_disparos){
+	switch(movimiento_Aliens.cantidad_aliens_vivos){
 	case 3:
 		dificultad.velocidad_horizontal = 2;
 		dificultad.aumento_posicion_pixeles = AUMENTO_POSICION_PIXELES_4;
@@ -577,6 +569,13 @@ void AumentoVelocidadAliens(){
 
 }
 
+
+void disparoTrue(){
+
+	Disparo.disparo = true;
+	Disparo.posicion_x = Player.posicion_X;
+
+}
 
 
 
