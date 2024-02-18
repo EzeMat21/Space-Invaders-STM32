@@ -775,10 +775,10 @@ void entryMemoria(void *argument)
   /* USER CODE BEGIN entryMemoria */
 
 	//vTaskSetApplicationTaskTag( NULL, ( void * ) 2 );
+	//Se leen los datos desde la memoria.
 
 	//Write_PuntajesEjemplos();
 
-	//Se leen los datos desde la memoria.
 	memoriaInit();
 
 
@@ -828,8 +828,6 @@ void entrySonido(void *argument)
 
 			HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
 			HAL_TIM_Base_Stop_IT(&htim3);
-
-			//musica = musica_;
 
 		  switch(musica){
 		  case gameover_:

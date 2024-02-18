@@ -165,7 +165,7 @@ uint8_t getCantidad_Aliens_Vivos();
 void disparoAliens();
 
 //Funciones disparo Player
-uint8_t getDisparo();
+uint8_t getDisparodisparo();
 void disparoInit();
 void disparar();
 void disparoTrue();

@@ -1,4 +1,4 @@
 ../Core/Src/menu.c:24:6:menuInit	1
-../Core/Src/menu.c:649:6:menuReset	1
-../Core/Src/menu.c:670:6:GuardarNombreReset	1
-../Core/Src/menu.c:61:6:menuActualizar	72
+../Core/Src/menu.c:678:6:menuReset	1
+../Core/Src/menu.c:699:6:GuardarNombreReset	1
+../Core/Src/menu.c:61:6:menuActualizar	77

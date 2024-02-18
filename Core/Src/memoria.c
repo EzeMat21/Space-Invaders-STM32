@@ -11,7 +11,7 @@
 
 extern SPI_HandleTypeDef hspi1;
 
-puntajes_t Puntajes[5];
+puntajes_t Puntajes[10];
 
 puntajes_t *getPuntajes(uint8_t indice){
 
@@ -99,7 +99,7 @@ void Read_all(uint16_t address, uint16_t tamano, uint8_t *buffer){
 void memoriaInit(){
 
 
-		char buff_nombre[7];
+		char buff_nombre[NUM_MAX_POR_NOMBRE+1];
 		strcpy(buff_nombre, "      ");
 
 		uint16_t address = MEMORIA_ADDRESS;
@@ -117,30 +117,45 @@ void memoriaInit(){
 
 		do{
 
-			if( (i==6) || (i==14) || (i==22) || (i==30) || (i==38) ){
+			if( (i==7) || (i==16) || (i==25) || (i==34) || (i==43) || (i==52) || (i==61) || (i==70) || (i==79) || (i==88) ){
 
 				puntaje_msb = buffer[i];
 			}
-			else if((i==7) || (i==15) || (i==23) || (i==31) || (i==39)){
+			else if((i==8) || (i==17) || (i==26) || (i==35) || (i==44) || (i==53) || (i==62) || (i==71) || (i==80) || (i==89) ){
 
 				puntaje_lsb = buffer[i];
 
 				switch(i){
 
-				case 7:
+				case 8:
 					Puntajes[0].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
-				case 15:
+				case 17:
 					Puntajes[1].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
-				case 23:
+				case 26:
 					Puntajes[2].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
-				case 31:
+				case 35:
 					Puntajes[3].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
-				case 39:
+				case 44:
 					Puntajes[4].puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					break;
+				case 53:
+					Puntajes[5].puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					break;
+				case 62:
+					Puntajes[6].puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					break;
+				case 71:
+					Puntajes[7].puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					break;
+				case 80:
+					Puntajes[8].puntaje = (puntaje_msb<<8) + puntaje_lsb;
+					break;
+				case 89:
+					Puntajes[9].puntaje = (puntaje_msb<<8) + puntaje_lsb;
 					break;
 
 				}
@@ -157,24 +172,39 @@ void memoriaInit(){
 
 					if(buff_nombre[j] == '\0'){
 
-						if((i>=0 && i<6)){
+						if((i>=0 && i<7)){
 							strcpy(Puntajes[0].nombre, buff_nombre);
 						}
-						else if((i>=8 && i<14)){
+						else if((i>=9 && i<16)){
 							strcpy(Puntajes[1].nombre, buff_nombre);
 						}
-						else if((i>=16 && i<22)){
+						else if((i>=18 && i<25)){
 							strcpy(Puntajes[2].nombre, buff_nombre);
 						}
-						else if((i>=24 && i<30)){
+						else if((i>=27 && i<34)){
 							strcpy(Puntajes[3].nombre, buff_nombre);
 						}
-						else if((i>=32 && i<38)){
+						else if((i>=36 && i<43)){
 							strcpy(Puntajes[4].nombre, buff_nombre);
+						}
+						else if((i>=45 && i<52)){
+							strcpy(Puntajes[5].nombre, buff_nombre);
+						}
+						else if((i>=54 && i<61)){
+							strcpy(Puntajes[6].nombre, buff_nombre);
+						}
+						else if((i>=63 && i<70)){
+							strcpy(Puntajes[7].nombre, buff_nombre);
+						}
+						else if((i>=72 && i<79)){
+							strcpy(Puntajes[8].nombre, buff_nombre);
+						}
+						else if((i>=81 && i<88)){
+							strcpy(Puntajes[9].nombre, buff_nombre);
 						}
 
 						j = 0;
-						strcpy(buff_nombre, "      ");
+						strcpy(buff_nombre, "       ");
 						permiso = false;
 					}
 					else{
@@ -184,7 +214,7 @@ void memoriaInit(){
 			}
 			i++;
 
-		}while(i != 40);
+		}while(i != TAMANO_TOTAL_PUNTAJES);
 
 
 }
@@ -204,72 +234,130 @@ void writeNuevosPuntajes(uint8_t permutaciones){
 
 	for(uint8_t i=0;i<TAMANO_TOTAL_PUNTAJES;i++){
 
-		if(i>=0 && i<6){
+		if(i>=0 && i<7){
 
 			buff_nuevosPuntajes[i] = Puntajes[0].nombre[k];
 			k++;
 		}
-		else if(i>=8 && i<14){
+		else if(i>=9 && i<16){
 
 			buff_nuevosPuntajes[i] = Puntajes[1].nombre[k];
 			k++;
 		}
-		else if(i>=16 && i<22){
+		else if(i>=18 && i<25){
 
 			buff_nuevosPuntajes[i] = Puntajes[2].nombre[k];
 			k++;
 		}
-		else if(i>=24 && i<30){
+		else if(i>=27 && i<34){
 
 			buff_nuevosPuntajes[i] = Puntajes[3].nombre[k];
 			k++;
 		}
-		else if(i>=32 && i<38){
+		else if(i>=36 && i<43){
 
 			buff_nuevosPuntajes[i] = Puntajes[4].nombre[k];
 			k++;
 		}
+		else if(i>=45 && i<52){
 
+			buff_nuevosPuntajes[i] = Puntajes[5].nombre[k];
+			k++;
+		}
+		else if(i>=54 && i<61){
 
+			buff_nuevosPuntajes[i] = Puntajes[6].nombre[k];
+			k++;
+		}
+		else if(i>=63 && i<70){
+
+			buff_nuevosPuntajes[i] = Puntajes[7].nombre[k];
+			k++;
+		}
+		else if(i>=72 && i<79){
+
+			buff_nuevosPuntajes[i] = Puntajes[8].nombre[k];
+			k++;
+		}
+		else if(i>=81 && i<88){
+
+			buff_nuevosPuntajes[i] = Puntajes[9].nombre[k];
+			k++;
+		}
 
 
 		switch(i){
 
 
-		case 6:
+		case 7:
 			buff_nuevosPuntajes[i] = Puntajes[0].puntaje >>8;
 			k = 0;
 			break;
-		case 7:
+		case 8:
 			buff_nuevosPuntajes[i] = Puntajes[0].puntaje & 0xFF;
 			break;
-		case 14:
+		case 16:
 			buff_nuevosPuntajes[i] = Puntajes[1].puntaje >>8;
 			k = 0;
 			break;
-		case 15:
+		case 17:
 			buff_nuevosPuntajes[i] = Puntajes[1].puntaje & 0xFF;
 			break;
-		case 22:
+		case 25:
 			buff_nuevosPuntajes[i] = Puntajes[2].puntaje >>8;
 			k = 0;
 			break;
-		case 23:
+		case 26:
 			buff_nuevosPuntajes[i] = Puntajes[2].puntaje & 0xFF;
 			break;
-		case 30:
+		case 34:
 			buff_nuevosPuntajes[i] = Puntajes[3].puntaje >>8;
 			k = 0;
 			break;
-		case 31:
+		case 35:
 			buff_nuevosPuntajes[i] = Puntajes[3].puntaje & 0xFF;
 			break;
-		case 38:
+		case 43:
 			buff_nuevosPuntajes[i] = Puntajes[4].puntaje >>8;
 			k = 0;
 			break;
-		case 39:
+		case 44:
 			buff_nuevosPuntajes[i] = Puntajes[4].puntaje & 0xFF;
+			break;
+		case 52:
+			buff_nuevosPuntajes[i] = Puntajes[5].puntaje >>8;
+			k = 0;
+			break;
+		case 53:
+			buff_nuevosPuntajes[i] = Puntajes[5].puntaje & 0xFF;
+			break;
+		case 61:
+			buff_nuevosPuntajes[i] = Puntajes[6].puntaje >>8;
+			k = 0;
+			break;
+		case 62:
+			buff_nuevosPuntajes[i] = Puntajes[6].puntaje & 0xFF;
+			break;
+		case 70:
+			buff_nuevosPuntajes[i] = Puntajes[7].puntaje >>8;
+			k = 0;
+			break;
+		case 71:
+			buff_nuevosPuntajes[i] = Puntajes[7].puntaje & 0xFF;
+			break;
+		case 79:
+			buff_nuevosPuntajes[i] = Puntajes[8].puntaje >>8;
+			k = 0;
+			break;
+		case 80:
+			buff_nuevosPuntajes[i] = Puntajes[8].puntaje & 0xFF;
+			break;
+		case 88:
+			buff_nuevosPuntajes[i] = Puntajes[9].puntaje >>8;
+			k = 0;
+			break;
+		case 89:
+			buff_nuevosPuntajes[i] = Puntajes[9].puntaje & 0xFF;
 			break;
 
 		}
@@ -300,10 +388,10 @@ void writeNuevosPuntajes(uint8_t permutaciones){
 		}
 		else{
 
-			address = MEMORIA_ADDRESS + 32;
-			Write_Memoria(address, buff_nuevosPuntajes[32]);
+			address = MEMORIA_ADDRESS + OFFSET_ULTIMO_PUNTAJE;
+			Write_Memoria(address, buff_nuevosPuntajes[OFFSET_ULTIMO_PUNTAJE]);
 
-			for(uint8_t i=32; i<TAMANO_TOTAL_PUNTAJES;i++){
+			for(uint8_t i=OFFSET_ULTIMO_PUNTAJE; i<TAMANO_TOTAL_PUNTAJES;i++){
 				Write_Memoria(address, buff_nuevosPuntajes[i]);
 				HAL_Delay(10);
 				address++;
@@ -324,14 +412,14 @@ uint8_t Ordenamiento_Puntajes(){
 
 	uint8_t permutaciones = 0;
 
-	uint16_t vector[5];
-	char buff_nombre[5][6];
+	uint16_t vector[NUM_MAX_PUNTAJES];
+	char buff_nombre[NUM_MAX_PUNTAJES][NUM_MAX_POR_NOMBRE];
 	uint8_t indice_subvector = 1;
 	uint16_t auxiliar;
 
 
 	//Copio los nombres y los puntajes porque voy a reescribir getPuntajes()
-	for(uint8_t i=0;i<5;i++){
+	for(uint8_t i=0;i<NUM_MAX_PUNTAJES;i++){
 
 		vector[i] = Puntajes[i].puntaje;
 		strcpy(buff_nombre[i], Puntajes[i].nombre);
@@ -357,15 +445,15 @@ uint8_t Ordenamiento_Puntajes(){
 
 		indice_subvector++;
 
-	}while(indice_subvector != 5);
+	}while(indice_subvector != NUM_MAX_PUNTAJES);
 
 
 
 	uint8_t finalizado;
-	char buff_aux[6];
+	char buff_aux[NUM_MAX_POR_NOMBRE];
 
 
-	for(uint8_t k=0;k<5;k++){
+	for(uint8_t k=0;k<NUM_MAX_PUNTAJES;k++){
 
 		finalizado = true;
 
@@ -395,8 +483,8 @@ uint8_t Ordenamiento_Puntajes(){
 
 void Write_PuntajesEjemplos(){
 
-	uint16_t puntaje[5];
-	char buffer[5][6];
+	uint16_t puntaje[NUM_MAX_PUNTAJES];
+	char buffer[NUM_MAX_PUNTAJES][NUM_MAX_POR_NOMBRE];
 
 	strcpy(buffer[0], "messi");
 	puntaje[0] = 30000;
@@ -408,10 +496,25 @@ void Write_PuntajesEjemplos(){
 	puntaje[2] = 9999;
 
 	strcpy(buffer[3], "kafka");
-	puntaje[3] = 1000;
+	puntaje[3] = 8888;
 
 	strcpy(buffer[4], "juan");
-	puntaje[4] = 600;
+	puntaje[4] = 7777;
+
+	strcpy(buffer[5], "magnus");
+	puntaje[5] = 6666;
+
+	strcpy(buffer[6], "hikaru");
+	puntaje[6] = 5555;
+
+	strcpy(buffer[7], "vishy");
+	puntaje[7] = 0;
+
+	strcpy(buffer[8], "vishy");
+	puntaje[8] = 0;
+
+	strcpy(buffer[9], "noderb");
+	puntaje[9] = 0;
 
 	Write_Enable();
 	HAL_Delay(10);
@@ -419,11 +522,11 @@ void Write_PuntajesEjemplos(){
 	uint16_t address = MEMORIA_ADDRESS;
 	uint8_t j = 0;
 
-	while(j != 5){
+	while(j != NUM_MAX_PUNTAJES){
 
 
 
-		for(uint8_t i=0;i<6;i++){
+		for(uint8_t i=0;i<NUM_MAX_POR_NOMBRE;i++){
 
 			Write_Memoria(address, buffer[j][i]);
 			address++;

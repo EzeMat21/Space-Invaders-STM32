@@ -39,7 +39,7 @@ void menuInit(){
 
 
 	//Se inicializa el cursor de la pantalla principal.
-	//menu.menuActual =  progresion_niveles;
+	//menu.menuActual =  guardar_nombre;
 	menu.menuActual = menu_principal;
 	//menu.menuActual = juego;
 	menu.posicion_MenuPrincipal = POSICION_CURSOR_JUGAR;
@@ -112,7 +112,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		plotBases();
 
 		//Se grafican el player, aliens y disparo.
-		//plotPlayer(x);
+		plotPlayer(x);
 		plotAliens();
 		disparoAliens();
 
@@ -147,9 +147,8 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			menu.menuActual = game_over;
 		}
 
-
 		//Si se apretó el boton, si el jugador esta vivo y no existe ningun disparo existente.
-		if( (boton == true) && (getPlayer().vivo == true) && (getDisparo() == false)){
+		if( (boton == true) && (getPlayer().vivo == true) && (getDisparodisparo() == false)){
 
 			//Disparo se hace verdadero.
 			disparoTrue();
@@ -163,9 +162,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 		}
 
-		plotPlayer(x);
 		disparar();
-
 
 		//Se genera el sonido de la explosion de los aliens.
 		if(getCantidad_Aliens_Vivos() != numero_aliens && getPlayer().vivo == true){
@@ -270,16 +267,56 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 		}
 
 
-
-
-		switch(y){
-		case arriba:
-				menu.menuActual = menu_principal;
-			break;
-		default:
-			break;
+		if(y == arriba){
+			menu.menuActual = menu_principal;
 		}
+
+		if(x == derecha){
+			menu.menuActual = puntajes2;
+		}
+
 		break;
+
+
+//-------------------------------------------------------------- PUNTAJES 2DO VENTANA-----------------------------------------------------------------------------
+
+case puntajes2:
+
+	//Titulo 'Puntajes'
+	SSD1306_GotoXY(35, 0);
+	SSD1306_Puts("PUNTAJES", &Font_7x10, 1);
+
+	uint8_t posicion_2;
+	uint8_t buffer_2[2];
+	uint8_t k = 0;
+
+	for(uint8_t j=5; j<NUM_MAX_PUNTAJES;j++){
+
+		posicion_2 = k*10 + 13;
+
+		SSD1306_GotoXY(15, posicion_2);
+		SSD1306_Puts(getPuntajes(j)->nombre, &Font_7x10, 1);
+		k++;
+	}
+
+	k = 0;
+
+	//Puntuaciones
+	for(uint8_t j=5; j<NUM_MAX_PUNTAJES;j++){
+
+		posicion_2 = k*10 + 13;
+
+		SSD1306_GotoXY(90, posicion_2);
+		itoa(getPuntajes(j)->puntaje,(char*)buffer_2,10);
+		SSD1306_Puts((char *)buffer_2, &Font_7x10, 1);
+		k++;
+	}
+
+	if(x == izquierda){
+		menu.menuActual = puntajes;
+	}
+
+	break;
 
 
 //-------------------------------------------------------------- GUARDADO DEL NOMBRE-----------------------------------------------------------------------------
@@ -446,7 +483,8 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 						}
 					}
 					else{
-						if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X3_INICIAL - GUARDADO_OFFSET_X_CURSOR) ){
+						if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X3_INICIAL - GUARDADO_OFFSET_X_CURSOR)
+								|| menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_BORRAR - GUARDADO_OFFSET_X_CURSOR)){
 
 							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
 						}
@@ -455,10 +493,6 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X3_FINAL;
 						}
 
-						else if(menu.GuardarNombre.posicion_x == (uint8_t)(GUARDADO_POSICION_X_BORRAR - GUARDADO_OFFSET_X_CURSOR)){
-
-							menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_BORRAR;
-						}
 					}
 
 					break;
@@ -505,7 +539,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 			//uint8_t buffer_debug[6];
 
 
-			if((boton == true) && (menu.GuardarNombre.indice <= 5)){
+			if((boton == true) && (menu.GuardarNombre.indice <= 6)){
 
 						if((menu.GuardarNombre.posicion_y != GUARDADO_POSICION_Y3)){
 
@@ -557,10 +591,10 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 											osMutexAcquire(myMutexPuntajeHandle, osWaitForever);
 
-											getPuntajes(4)->puntaje  = getPlayer().puntaje;
+											getPuntajes(9)->puntaje  = getPlayer().puntaje;
 
 											//Guardo el nuevo nombre en la posicion 5 de getPuntajes()->nombre.
-											strcpy(getPuntajes(4)->nombre,menu.GuardarNombre.nombre);
+											strcpy(getPuntajes(9)->nombre,menu.GuardarNombre.nombre);
 
 											osMutexRelease(myMutexPuntajeHandle);
 
@@ -590,8 +624,6 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 										menu.GuardarNombre.nombre[menu.GuardarNombre.indice] = buff_zxc[div];
 										menu.GuardarNombre.indice = menu.GuardarNombre.indice + 1;
 
-										//indice_debug = menu.GuardarNombre.indice;
-
 									}
 
 								}
@@ -599,9 +631,9 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 							}
 
-						if(menu.GuardarNombre.indice > 5){
-							menu.GuardarNombre.indice = 5;
-							menu.GuardarNombre.nombre[5] = '\0';
+						if(menu.GuardarNombre.indice > 6){
+							menu.GuardarNombre.indice = 6;
+							menu.GuardarNombre.nombre[6] = '\0';
 						}
 
 				}
@@ -616,7 +648,7 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 				SSD1306_DrawFilledCircle(menu.GuardarNombre.posicion_x,  menu.GuardarNombre.posicion_y, 5, 1);
 
 				//Se actualiza el nombre en el recuadro.
-				SSD1306_GotoXY(43, 5);
+				SSD1306_GotoXY(39, 5);
 				SSD1306_Puts(menu.GuardarNombre.nombre, &Font_7x10, 1);
 
 
@@ -625,9 +657,6 @@ void menuActualizar(uint8_t x, uint8_t y, uint8_t boton){
 
 //-------------------------------------------------------------- GAME OVER -----------------------------------------------------------------------------
 	case game_over:
-
-		//SSD1306_GotoXY(35, 25);
-		//SSD1306_Puts("GAME OVER", &Font_7x10, 1);
 
 		SSD1306_DrawBitmap(15, 10, game_over_figura, 100, 40, 1);
 
@@ -673,7 +702,7 @@ void GuardarNombreReset(){
 	menu.GuardarNombre.posicion_x = GUARDADO_POSICION_X_INICIAL;
 	menu.GuardarNombre.posicion_y = GUARDADO_POSICION_Y1;
 	menu.GuardarNombre.indice = 0;
-	strcpy(menu.GuardarNombre.nombre,"     ");
+	strcpy(menu.GuardarNombre.nombre,"      ");
 
 }
 

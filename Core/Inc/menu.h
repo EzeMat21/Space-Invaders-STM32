@@ -21,7 +21,7 @@ typedef struct{
 
 	uint8_t posicion_x;
 	uint8_t posicion_y;
-	char nombre[6];
+	char nombre[7];
 	int8_t indice;
 	TickType_t xLastWakeTime_x;
 	TickType_t xLastWakeTime_y;
@@ -53,6 +53,7 @@ enum{
 	juego,
 	progresion_niveles,
 	puntajes,
+	puntajes2,
 	guardar_nombre,
 	game_over
 

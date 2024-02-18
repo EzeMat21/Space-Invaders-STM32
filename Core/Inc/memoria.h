@@ -21,7 +21,7 @@
 
 typedef struct{
 
-	char nombre[6];
+	char nombre[7];
 	uint16_t puntaje;
 
 }puntajes_t;
@@ -45,9 +45,11 @@ extern SPI_HandleTypeDef hspi1;
 #define MEMORIA_ADDRESS 0
 #define TAMANO_PAGINA 64
 
-#define MEMORIA_TAMANO_PUNTAJE 8	//6 bytes de nombre y 2 bytes de puntaje
-#define TAMANO_TOTAL_PUNTAJES 40
-
+#define MEMORIA_TAMANO_PUNTAJE 9	//7 bytes de nombre y 2 bytes de puntaje
+#define TAMANO_TOTAL_PUNTAJES 90
+#define OFFSET_ULTIMO_PUNTAJE 81
+#define NUM_MAX_PUNTAJES 10
+#define NUM_MAX_POR_NOMBRE 7
 
 puntajes_t *getPuntajes(uint8_t indice);
 void Write_Enable();

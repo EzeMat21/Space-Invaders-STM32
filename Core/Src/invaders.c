@@ -29,9 +29,6 @@ const uint8_t limites_izquierda[] = {LIMITE_IZQ_X_BASE1, LIMITE_IZQ_X_BASE2, LIM
 const uint8_t limites_derecha[] = {LIMITE_DER_X_BASE1, LIMITE_DER_X_BASE2, LIMITE_DER_X_BASE3};
 
 
-//Para el debug;
-uint8_t debug[7];
-
 //----------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -40,7 +37,7 @@ player_t getPlayer(){
 	return Player;
 }
 
-uint8_t getDisparo(){
+uint8_t getDisparodisparo(){
 	return Disparo.disparo;
 }
 
