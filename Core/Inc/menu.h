@@ -88,6 +88,7 @@ void menuInit();
 void menuReset();
 void GuardarNombreReset();
 void menuActualizar(uint8_t x, uint8_t y, uint8_t boton);
+uint8_t *getMenuActual();
 
 
 

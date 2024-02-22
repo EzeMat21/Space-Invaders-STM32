@@ -31,7 +31,6 @@
 #include "menu.h"
 
 
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -73,6 +72,52 @@ volatile uint8_t conteo_musica;
 /* USER CODE BEGIN PM */
 
 
+
+//Para el debug, trace hooks.
+
+void callback_in(int tag){
+	switch(tag){
+		case 0:
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
+		break;
+		case 1:
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+		break;
+		case 2:
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+		break;
+		case 3:
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+		break;
+		case 4:
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+		break;
+	}
+}
+
+
+void callback_out(int tag){
+	switch(tag){
+		case 0:
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
+		break;
+		case 1:
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+		break;
+		case 2:
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+		break;
+		case 3:
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+		break;
+		case 4:
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
+		break;
+	}
+}
+
+
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -91,7 +136,7 @@ osThreadId_t JoystickTaskHandle;
 const osThreadAttr_t JoystickTask_attributes = {
   .name = "JoystickTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for PantallaTask */
 osThreadId_t PantallaTaskHandle;
@@ -124,16 +169,10 @@ osMessageQueueId_t queueSonidoMenuHandle;
 const osMessageQueueAttr_t queueSonidoMenu_attributes = {
   .name = "queueSonidoMenu"
 };
-/* Definitions for myMutexPuntaje */
-osMutexId_t myMutexPuntajeHandle;
-const osMutexAttr_t myMutexPuntaje_attributes = {
-  .name = "myMutexPuntaje"
-};
 /* USER CODE BEGIN PV */
 
 //Notificacion entre MemoriaTask y PantallaTask
 osEventFlagsId_t notificationFlag;
-osEventFlagsId_t notificationFlag2;
 
 /* USER CODE END PV */
 
@@ -201,9 +240,6 @@ int main(void)
 
   /* Init scheduler */
   osKernelInitialize();
-  /* Create the mutex(es) */
-  /* creation of myMutexPuntaje */
-  myMutexPuntajeHandle = osMutexNew(&myMutexPuntaje_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -250,7 +286,6 @@ int main(void)
 
   //Creacion de la cola notificacion.
   notificationFlag = osEventFlagsNew(NULL);
-  notificationFlag2 = osEventFlagsNew(NULL);
 
   /* USER CODE END RTOS_EVENTS */
 
@@ -607,7 +642,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10, GPIO_PIN_RESET);
@@ -625,8 +660,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB14 PB15 PB5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_5;
+  /*Configure GPIO pins : PB13 PB14 PB15 PB5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -645,8 +680,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-
-
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_entryJoystick */
@@ -661,7 +694,7 @@ void entryJoystick(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 
-	//vTaskSetApplicationTaskTag( NULL, ( void * ) 0 );
+	vTaskSetApplicationTaskTag( NULL, ( void * ) 1 );
 
 	botones_t joystick;
 	uint16_t val_x, val_y;
@@ -684,10 +717,10 @@ void entryJoystick(void *argument)
 	  val_y = HAL_ADC_GetValue(&hadc2);
 	  HAL_ADC_Stop(&hadc2);
 
-	  if(val_x > 2200){
+	  if(val_x > UMBRAL_DERECHA){
 		  joystick.x_value = derecha;
 	  }
-	  else if(val_x < 1600){
+	  else if(val_x < UMBRAL_IZQUIERDA){
 		  joystick.x_value = izquierda;
 	  }
 	  else{
@@ -695,10 +728,10 @@ void entryJoystick(void *argument)
 	  }
 
 
-	  if(val_y > 2200){
+	  if(val_y > UMBRAL_ABAJO){
 		  joystick.y_value = abajo;
 	  }
-	  else if(val_y < 1600){
+	  else if(val_y < UMBRAL_ARRIBA){
 		  joystick.y_value = arriba;
 	  }
 	  else{
@@ -737,7 +770,7 @@ void entryPantalla(void *argument)
   /* Infinite loop */
 
 
-	//vTaskSetApplicationTaskTag( NULL, ( void * ) 1 );
+	vTaskSetApplicationTaskTag( NULL, ( void * ) 2 );
 
 	//Se inicializan los botones (eje y, eje x del joystick y boton)
 	botones_t joystick;
@@ -774,7 +807,7 @@ void entryMemoria(void *argument)
 {
   /* USER CODE BEGIN entryMemoria */
 
-	//vTaskSetApplicationTaskTag( NULL, ( void * ) 2 );
+	vTaskSetApplicationTaskTag( NULL, ( void * ) 3 );
 	//Se leen los datos desde la memoria.
 
 	//Write_PuntajesEjemplos();
@@ -796,9 +829,11 @@ void entryMemoria(void *argument)
 
 	    	  writeNuevosPuntajes(permutaciones);
 
+				//Se reinician los valores de todos los menues
+				//(se reinician las posiciones del player, flags en el juego - las posiciones de los cursores, etc.
+				menuReset();
+				*getMenuActual() = puntajes;
 
-	    	  //Envio la notificacion 2 para que la tarea PantallaTask pueda pasar del menu guardado_nombre al menu de puntajes una vez que los puntajes ya se encuentran ordenadas y guardadas, ya que sin esta segunda sincronizacion, puede pasarse al menu puntajes sin que estos se encuentren ordenados. El ordenado se realiza en esta tarea MemoriaTask ya que las escrituras de puntajes se realizan solo en esta tarea.
-	    	  osEventFlagsSet(notificationFlag2, NOTIFICATION_VALUE2);
 	      }
 
   }
@@ -815,6 +850,8 @@ void entryMemoria(void *argument)
 void entrySonido(void *argument)
 {
   /* USER CODE BEGIN entrySonido */
+
+	vTaskSetApplicationTaskTag( NULL, ( void * ) 4 );
 
   /* Infinite loop */
   for(;;)
@@ -881,7 +918,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		TIM2->CCR1 = *puntero_musica >> 1;
 		puntero_musica++;
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
 
 		switch(musica){
 
@@ -960,6 +997,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					 default:
 						 break;
 				 }
+
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
   }
 
   /* USER CODE END Callback 1 */

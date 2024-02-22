@@ -364,6 +364,25 @@ void writeNuevosPuntajes(uint8_t permutaciones){
 
 	}
 
+	// Arreglo de índices de inicio para cada grupo de datos en Puntajes
+	/*const uint8_t indices_inicio[] = {0, 9, 18, 27, 36, 45, 54, 63, 72, 81};
+
+	for(uint8_t i = 0; i < TAMANO_TOTAL_PUNTAJES; i++) {
+	    if(i % 9 == 7) {
+	        buff_nuevosPuntajes[i] = Puntajes[i / 9].puntaje >> 8;
+	        k = 0;
+	    }
+	    else if(i % 9 == 8) {
+	        buff_nuevosPuntajes[i] = Puntajes[i / 9].puntaje & 0xFF;
+	    }
+	    else {
+	        uint8_t indice_puntajes = i / 9;
+	        uint8_t indice_nombre = indices_inicio[indice_puntajes] + (i % 9);
+	        buff_nuevosPuntajes[i] = Puntajes[indice_puntajes].nombre[indice_nombre];
+	        k++;
+	    }
+	}*/
+
 
 	//Ahora sí se realiza la escritura.
 	//La escritura se realizará siempre que se realice mas de un cambio en las posiciones de los puntajes.
@@ -371,7 +390,7 @@ void writeNuevosPuntajes(uint8_t permutaciones){
 
 
 	Write_Enable();
-	HAL_Delay(10);
+	HAL_Delay(1);
 
 
 		if(permutaciones > 0){
@@ -380,7 +399,7 @@ void writeNuevosPuntajes(uint8_t permutaciones){
 
 			for(uint8_t i=0; i<TAMANO_TOTAL_PUNTAJES;i++){
 				Write_Memoria(address, buff_nuevosPuntajes[i]);
-				HAL_Delay(10);
+				HAL_Delay(2);
 				address++;
 			}
 
@@ -393,7 +412,7 @@ void writeNuevosPuntajes(uint8_t permutaciones){
 
 			for(uint8_t i=OFFSET_ULTIMO_PUNTAJE; i<TAMANO_TOTAL_PUNTAJES;i++){
 				Write_Memoria(address, buff_nuevosPuntajes[i]);
-				HAL_Delay(10);
+				HAL_Delay(2);
 				address++;
 
 			}
@@ -510,10 +529,10 @@ void Write_PuntajesEjemplos(){
 	strcpy(buffer[7], "vishy");
 	puntaje[7] = 0;
 
-	strcpy(buffer[8], "vishy");
+	strcpy(buffer[8], "joseph");
 	puntaje[8] = 0;
 
-	strcpy(buffer[9], "noderb");
+	strcpy(buffer[9], "nodirb");
 	puntaje[9] = 0;
 
 	Write_Enable();

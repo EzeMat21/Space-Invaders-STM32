@@ -62,5 +62,6 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c:1725:10:osMessageQueueGetSpace	6
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c:1748:12:osMessageQueueReset	6
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c:1766:12:osMessageQueueDelete	6
+../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c:1805:13:vApplicationIdleHook	1
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c:1857:6:vApplicationGetIdleTaskMemory	1
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c:1867:6:vApplicationGetTimerTaskMemory	1

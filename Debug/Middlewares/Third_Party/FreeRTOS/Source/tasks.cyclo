@@ -6,8 +6,8 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1021:13:prvAddNewTaskToReadyList	8
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:3670:14:prvDeleteTCB	4
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:3462:13:prvCheckTasksWaitingTermination	3
-../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:3218:8:prvIdleTask	2
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:4906:13:prvAddCurrentTaskToDelayedList	5
+../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:3218:8:prvIdleTask	2
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:575:15:xTaskCreateStatic	4
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:726:13:xTaskCreate	4
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1106:7:vTaskDelete	7

@@ -54,7 +54,7 @@
 #define configUSE_PREEMPTION                     1
 #define configSUPPORT_STATIC_ALLOCATION          1
 #define configSUPPORT_DYNAMIC_ALLOCATION         1
-#define configUSE_IDLE_HOOK                      0
+#define configUSE_IDLE_HOOK                      1
 #define configUSE_TICK_HOOK                      0
 #define configCPU_CLOCK_HZ                       ( SystemCoreClock )
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
@@ -147,12 +147,12 @@ standard names. */
 /* USER CODE BEGIN Defines */
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
 
-/*
+
 void callback_in(int);
 void callback_out(int);
 #define traceTASK_SWITCHED_IN() callback_in((int)pxCurrentTCB->pxTaskTag)
 #define traceTASK_SWITCHED_OUT() callback_out((int)pxCurrentTCB->pxTaskTag)
-*/
+
 
 /* USER CODE END Defines */
 

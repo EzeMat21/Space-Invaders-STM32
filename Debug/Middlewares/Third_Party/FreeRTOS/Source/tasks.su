@@ -6,8 +6,8 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1021:13:prvAddNewTaskToReadyList	8	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:3670:14:prvDeleteTCB	8	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:3462:13:prvCheckTasksWaitingTermination	8	static
-../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:3218:8:prvIdleTask	8	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:4906:13:prvAddCurrentTaskToDelayedList	16	static
+../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:3218:8:prvIdleTask	8	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:575:15:xTaskCreateStatic	40	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:726:13:xTaskCreate	48	static
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1106:7:vTaskDelete	16	static,ignoring_inline_asm
@@ -31,7 +31,7 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2757:7:vTaskSetApplicationTaskTag	16	static
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2784:21:xTaskGetApplicationTaskTag	8	static
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2815:13:xTaskCallApplicationTaskHook	8	static
-../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2845:6:vTaskSwitchContext	0	static,ignoring_inline_asm
+../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2845:6:vTaskSwitchContext	8	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:1624:7:vTaskSuspend	16	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2904:6:vTaskPlaceOnEventList	8	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2921:6:vTaskPlaceOnUnorderedEventList	8	static,ignoring_inline_asm

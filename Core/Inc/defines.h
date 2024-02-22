@@ -8,7 +8,6 @@
 #ifndef INC_DEFINES_H_
 #define INC_DEFINES_H_
 
-
 #define true 1
 #define false 0
 
@@ -27,7 +26,11 @@ enum{
 
 //Para la cola de notificacion.
 #define NOTIFICATION_VALUE 1
-#define NOTIFICATION_VALUE2 2
+
+#define UMBRAL_DERECHA 2200
+#define UMBRAL_IZQUIERDA 1600
+#define UMBRAL_ABAJO 2200
+#define UMBRAL_ARRIBA 1600
 
 
 

@@ -9,7 +9,6 @@
 #include "menu.h"
 
 extern osEventFlagsId_t notificationFlag;
-extern osEventFlagsId_t notificationFlag2;
 
 extern osMutexId_t myMutexPuntajeHandle;
 extern osMessageQueueId_t queueSonidoMenuHandle;
@@ -20,6 +19,10 @@ extern TIM_HandleTypeDef htim3;
 menu_t menu;
 
 extern musica_t musica;
+
+uint8_t *getMenuActual(){
+	return &menu.menuActual;
+}
 
 void menuInit(){
 
@@ -589,33 +592,13 @@ case puntajes2:
 
 										if((menu.GuardarNombre.indice != 0 )){
 
-											osMutexAcquire(myMutexPuntajeHandle, osWaitForever);
-
 											getPuntajes(9)->puntaje  = getPlayer().puntaje;
 
 											//Guardo el nuevo nombre en la posicion 5 de getPuntajes()->nombre.
 											strcpy(getPuntajes(9)->nombre,menu.GuardarNombre.nombre);
 
-											osMutexRelease(myMutexPuntajeHandle);
-
-
-										    // Notifica a la tarea Task2 utilizando VTaskNotify
+											// Notifica a la tarea Memoria utilizando VTaskNotify
 										    osEventFlagsSet(notificationFlag, NOTIFICATION_VALUE);
-
-										    uint32_t flags = osEventFlagsWait(notificationFlag2, NOTIFICATION_VALUE2, osFlagsWaitAny, osWaitForever);
-
-										    if (flags == NOTIFICATION_VALUE2){
-
-									//Se reinician los valores de todos los menues
-									//(se reinician las posiciones del player, flags en el juego - las posiciones de los cursores, etc.
-										    	menuReset();
-
-
-										    	menu.menuActual = puntajes;
-
-										    }
-
-
 
 										}
 									}

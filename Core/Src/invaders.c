@@ -59,7 +59,7 @@ void playerInit(){
 
 	Player.posicion_X = 64;
 	Player.vivo = true;
-	Player.puntaje = 0;
+	Player.puntaje = 2000;
 	Player.vidas = 3;
 	Player.nivel = 0;
 
