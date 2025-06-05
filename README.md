@@ -15,7 +15,7 @@ A su vez, se utilizaron los siguientes periféricos del microcontrolador: 1 inte
 - SonidoTask: Se encarga de generar el sonido junto con la rutina de interrupción por Timer cuya frecuencia es de 8kHz. Se generan los sonidos del disparo del jugador, las explosiones de los invaders y la música del game-over.
 - MemoriaTask: Se encarga de almacenar los nuevos puntajes en la memoria EEPROM.
 
-![Diagrama en blanco](https://github.com/sistemas-embebidos-ing-unlp/SE2024-698043-TE2/assets/126365409/fbf1257d-f8ad-4cd8-bfa7-2c24c60d1801)
+<img src="assets/diagrama_tareas.jpeg" width=800/>
 
 
 
@@ -28,14 +28,9 @@ A su vez, se utilizaron los siguientes periféricos del microcontrolador: 1 inte
 - Guardado del Nombre
 
 
-<img src="https://github.com/sistemas-embebidos-ing-unlp/SE2024-698043-TE2/assets/126365409/16db1cc6-c041-4bb9-ade8-47af01c00de0" width="200"/>
-<img src="https://github.com/EzeMat21/Space-Invaders/assets/126365409/d2ab4b51-5467-426a-bfa0-6bca5952eaeb" width="200"/>
-<img src="https://github.com/EzeMat21/Space-Invaders/assets/126365409/a18693bd-61da-48fa-81de-00796d787953" width="200"/>
+<img src="assets/pantalla1.jpg" width="200"/> <img src="assets/pantalla2.jpg" width="200"/> <img src="assets/pantalla3.jpg" width="200"/>
 
-<img src="https://github.com/sistemas-embebidos-ing-unlp/SE2024-698043-TE2/assets/126365409/e5e40ddd-59a2-4a24-891e-2e880de54e07" width="200"/>
-<img src="https://github.com/EzeMat21/Space-Invaders/assets/126365409/1a87f3f8-44d9-4632-a522-726cd72ca1c2" width="200"/>
-<img src="https://github.com/sistemas-embebidos-ing-unlp/SE2024-698043-TE2/assets/126365409/82762a5a-9f8e-4f9c-89db-1dc7c74b1f7a" width="200"/>
-<img src="https://github.com/sistemas-embebidos-ing-unlp/SE2024-698043-TE2/assets/126365409/f5849e6b-0f87-450a-b2c4-f804d75af0d5" width="200"/>
+<img src="assets/pantalla4.jpg" width="200"/> <img src="assets/pantalla5.jpg" width="200"/> <img src="assets/pantalla6.jpg" width="200"/>
 
 #### LINKS CONSULTADOS
 Bitmaps de las figuras:
