@@ -33,7 +33,7 @@ A su vez, se utilizaron los siguientes periféricos del microcontrolador: 1 inte
 <img src="assets/pantalla4.jpg" width="200"/> <img src="assets/pantalla5.jpg" width="200"/> <img src="assets/pantalla6.jpg" width="200"/>
 
 #### LINKS CONSULTADOS
-Bitmaps de las figuras:
+La idea del proyecto y los bitmaps de las figuras:
 https://www.xtronical.com/projects/space-invaders/parts-1-7/part-2-invaders-invaders-everywhere-plotting-invaders-display/
 
 Musica de game-over: https://goodarduinocode.com/projects/simon
