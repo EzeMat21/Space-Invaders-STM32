@@ -1,7 +1,7 @@
 
 ### SPACE INVADERS UTILIZANDO RTOS
 
-El juego es una reimplementación propia de este proyecto: https://www.xtronical.com/projects/space-invaders/parts-1-7/part-2-invaders-invaders-everywhere-plotting-invaders-display/ecto: 
+El juego es una reimplementación propia de este proyecto: https://www.xtronical.com/projects/space-invaders/parts-1-7/part-2-invaders-invaders-everywhere-plotting-invaders-display
 
 
 Juego Space Invaders desarrollado en un STM32F103C8T6. Se utilizó RTOS para el programa, asignando 4 tareas diferentes: Joystick, Pantalla, Memoria y Sonido. Se utilizaron los siguientes mecanismos de comunicación: 2 colas de mensajes y 1 notificación.
