@@ -1,5 +1,5 @@
 
-### SPACE INVADERS UTILIZANDO RTOS
+### TP2 Especial Sistemas Embebibos: SPACE INVADERS UTILIZANDO RTOS
 
 El juego es una reimplementación propia de este proyecto: https://www.xtronical.com/projects/space-invaders/parts-1-7/part-2-invaders-invaders-everywhere-plotting-invaders-display
 
